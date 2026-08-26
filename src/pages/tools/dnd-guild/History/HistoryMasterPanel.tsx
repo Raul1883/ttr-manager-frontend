@@ -15,6 +15,7 @@ import {
 import { pb } from "../../../../API/PocketBase";
 import type { Quest } from "./HistoryMain";
 import useApp from "antd/es/app/useApp";
+import { RoleGuard } from "../../../../utils/RoleGuard";
 
 interface PanelProps {
   data: Quest[];
@@ -156,24 +157,26 @@ export default ({ data, mutate }: PanelProps) => {
 
   return (
     <div>
-      <Button type="primary" onClick={() => setIsOpen(true)}>
-        Управление историей
-      </Button>
+      <RoleGuard allowedRoles={["master"]}>
+        <Button type="primary" onClick={() => setIsOpen(true)}>
+          Управление историей
+        </Button>
 
-      <Modal
-        title="Панель администратора"
-        open={isOpen}
-        onCancel={() => setIsOpen(false)}
-        footer={null} // Отключаем стандартные кнопки модалки, у нас своя кнопка в форме
-      >
-        <Tabs
-          defaultActiveKey="1"
-          items={[
-            { key: "1", label: "Добавить запись", children: AddForm },
-            { key: "2", label: "Управление записями", children: ManageList },
-          ]}
-        />
-      </Modal>
+        <Modal
+          title="Панель администратора"
+          open={isOpen}
+          onCancel={() => setIsOpen(false)}
+          footer={null} // Отключаем стандартные кнопки модалки, у нас своя кнопка в форме
+        >
+          <Tabs
+            defaultActiveKey="1"
+            items={[
+              { key: "1", label: "Добавить запись", children: AddForm },
+              { key: "2", label: "Управление записями", children: ManageList },
+            ]}
+          />
+        </Modal>
+      </RoleGuard>
     </div>
   );
 };
