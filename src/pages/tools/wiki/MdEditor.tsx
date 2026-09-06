@@ -5,6 +5,7 @@ import { WikiLayout } from "./WikiLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Checkbox,
+  Empty,
   FloatButton,
   Form,
   Input,
@@ -20,8 +21,6 @@ import { useForm } from "antd/es/form/Form";
 import SaveOutlined from "@ant-design/icons/es/icons/SaveOutlined";
 import EyeOutlined from "@ant-design/icons/es/icons/EyeOutlined";
 import DeleteOutlined from "@ant-design/icons/es/icons/DeleteOutlined";
-
-
 
 const fetcher = async (id: string) => {
   try {
@@ -48,10 +47,17 @@ export default () => {
     fetcher,
   );
 
-  if (isLoading || error || !id)
+  if (isLoading || !id)
     return (
       <div className="markdown-body mx-8 mt-4 max-w-[80%] w-250">
         <Skeleton active />
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="markdown-body mx-8 mt-4 max-w-[80%] w-250">
+        <Empty />
       </div>
     );
 

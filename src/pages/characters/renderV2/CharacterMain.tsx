@@ -37,7 +37,7 @@ export default () => {
     } else {
       setLayout(data?.expand.list_schema.schema.layout);
     }
-  }, [data]);
+  }, [id, data]);
 
   const layoutReset = () => {
     setLayout(data?.expand.list_schema.schema.layout);
