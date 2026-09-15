@@ -8,6 +8,11 @@ export const menuItems = [
     description: "Управление активными играми",
   },
   {
+    title: "Заявки",
+    path: "/manage/applications",
+    description: "Просмотр активных заявок",
+  },
+  {
     title: "Игроки",
     path: "/manage/users",
     description: "Список пользователей и статистика",

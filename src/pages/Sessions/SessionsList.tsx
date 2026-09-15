@@ -21,7 +21,7 @@ export default ({ master = false }: { master: boolean }) => {
     const confirmDelete = window.confirm(`Точно?`);
     if (!confirmDelete) return;
 
-    await deleteById(`/sessions`, id);
+    await pb.collection("sessions").delete(id);
     await mutate();
   };
 
@@ -29,7 +29,6 @@ export default ({ master = false }: { master: boolean }) => {
 
   if (sessionsError || !sessionsData || sessionsData?.length == 0)
     return <Empty description="Нет данных" />;
-
 
   return (
     <Space wrap align="start">

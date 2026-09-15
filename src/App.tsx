@@ -28,6 +28,7 @@ import HistoryMain from "./pages/tools/dnd-guild/History/HistoryMain";
 import { TypewriterTheme } from "./assets/const";
 import { Applications } from "./pages/master/Applications";
 import NotFoundPage from "./pages/NotFoundPage";
+import MasterPanel from "./pages/master/MasterPanel";
 
 const CharacterSchemasEditor = React.lazy(
   () => import("./pages/master/SystemSchemaEditor/ListSchemasEditor"),
@@ -87,6 +88,7 @@ function App() {
 
                     {/* Вся панель управления */}
                     <Route path="/manage">
+                      <Route index element={<MasterPanel />} />
                       <Route path="users" element={<Users />} />
 
                       <Route path="sessions">
