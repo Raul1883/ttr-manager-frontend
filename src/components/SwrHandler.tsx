@@ -21,6 +21,7 @@ export function SwrHandler({
 
   if (error) return <Empty description={errorText || "Что-то пошло не так"} />;
 
-  if (!data) return <Empty description={emptyText || "Пока нет заявок"} />;
+  if (!data || data.length == 0)
+    return <Empty description={emptyText || "Пока тут пусто"} />;
   return children;
 }

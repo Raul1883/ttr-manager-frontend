@@ -1,16 +1,7 @@
 import useSWR from "swr";
 import { deleteById } from "../../API/Fetcher";
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  Empty,
-  Flex,
-  Popconfirm,
-  Space,
-  Spin,
-  Typography,
-} from "antd";
+import { Button, Card, Flex, Popconfirm, Space, Typography } from "antd";
 import CharacterImport from "./CharacterImport";
 import MainLayout from "../../components/MainLayout";
 import { pb } from "../../API/PocketBase";
@@ -19,10 +10,13 @@ import NavButton from "../../components/NavButton";
 import SystemsModal from "./SystemsModal";
 import { useAuth } from "../../contexts/AuthContext";
 import CharacterEditButton from "./CharacterEditButton";
+import { SwrHandler } from "../../components/SwrHandler";
+import { RoleGuard } from "../../utils/RoleGuard";
 
 export default function CharacterList() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { user } = useAuth();
+  const [myChars, setMyChars] = useState(true);
   const {
     data: characterData,
     isLoading: chrIsLoading,
@@ -30,31 +24,9 @@ export default function CharacterList() {
     mutate,
   } = useSWR<Character[]>(user ? ["characters", user.id] : null, ([url]) =>
     pb.collection(url).getFullList({
-      fields: "id,name",
+      fields: "id,name,owner",
     }),
   );
-
-  if (chrIsLoading || !user)
-    return (
-      <MainLayout>
-        <Spin />
-      </MainLayout>
-    );
-
-  if (chrError)
-    return (
-      <MainLayout>
-        <Empty>Ошибка загрузки</Empty>
-      </MainLayout>
-    );
-
-  if (!Array.isArray(characterData)) {
-    return (
-      <MainLayout>
-        <Empty description="Ошибка: сервер вернул данные в неверном формате. Перезагрузите страницу" />
-      </MainLayout>
-    );
-  }
 
   const deleteChar = async (id: string) => {
     await deleteById(`characters`, id);
@@ -63,11 +35,24 @@ export default function CharacterList() {
 
   return (
     <MainLayout>
-      <div>
+      <SwrHandler
+        isLoading={chrIsLoading}
+        error={chrError}
+        data={characterData}
+      >
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between mb-8 gap-2">
             <Typography.Title>Персонажи</Typography.Title>
             <Space>
+              <RoleGuard allowedRoles={["master"]}>
+                <Button
+                  onClick={() => {
+                    setMyChars(!myChars);
+                  }}
+                >
+                  {myChars ? "Все персонажи" : "Мои персонажи"}
+                </Button>
+              </RoleGuard>
               <CharacterImport mutate={mutate} />
               <Button
                 onClick={() => {
@@ -79,19 +64,11 @@ export default function CharacterList() {
             </Space>
           </div>
 
-          {!Array.isArray(characterData) ? (
-            <div>Ошибка формата данных</div>
-          ) : (
-            <div />
-          )}
+          <Flex gap="medium" justify="" wrap>
+            {characterData?.map((character) => {
+              if (myChars && character.owner != user?.id) return null;
 
-          {characterData?.length === 0 ? (
-            <p className="text-center text-gray-500 text-lg">
-              Пока нет ни одного персонажа
-            </p>
-          ) : (
-            <Flex gap="medium" justify="">
-              {characterData?.map((character) => (
+              return (
                 <Card
                   key={character.id}
                   title={character.name}
@@ -114,10 +91,10 @@ export default function CharacterList() {
                       <Button danger>Удалить</Button>
                     </Popconfirm>,
                   ]}
-                ></Card>
-              ))}
-            </Flex>
-          )}
+                />
+              );
+            })}
+          </Flex>
         </div>
 
         <SystemsModal
@@ -125,7 +102,7 @@ export default function CharacterList() {
           setIsModalOpen={setIsModalOpen}
           mutate={mutate}
         />
-      </div>
+      </SwrHandler>
     </MainLayout>
   );
 }
