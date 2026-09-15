@@ -21,19 +21,19 @@ import { ConfigProvider, App as AppAntD } from "antd";
 import MainPage from "./pages/MainPage";
 
 import React, { Suspense } from "react";
-import MasterPanel from "./pages/master/MasterPanel";
 import CharacterMain from "./pages/characters/renderV2/CharacterMain";
 import MdEditor from "./pages/tools/wiki/MdEditor";
 import GuildWeapon from "./pages/tools/dnd-guild/WeaponGen/GuildWeapon";
 import HistoryMain from "./pages/tools/dnd-guild/History/HistoryMain";
 import { TypewriterTheme } from "./assets/const";
+import { Applications } from "./pages/master/Applications";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const CharacterSchemasEditor = React.lazy(
   () => import("./pages/master/SystemSchemaEditor/ListSchemasEditor"),
 );
 
 const WikiPage = React.lazy(() => import("./pages/tools/wiki/WikiPage"));
-
 
 function App() {
   return (
@@ -48,6 +48,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/reg" element={<Reg />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                <Route path="*" element={<NotFoundPage />} />
 
                 {/* Sessions */}
                 <Route path="/sessions">
@@ -86,7 +87,6 @@ function App() {
 
                     {/* Вся панель управления */}
                     <Route path="/manage">
-                      <Route index element={<MasterPanel />} />
                       <Route path="users" element={<Users />} />
 
                       <Route path="sessions">
@@ -99,6 +99,10 @@ function App() {
                           path=":id"
                           element={<SessionsEditorV2 mode="edit" />}
                         />
+                      </Route>
+
+                      <Route path="applications">
+                        <Route index element={<Applications />} />
                       </Route>
 
                       <Route path="schemas">
