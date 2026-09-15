@@ -8,7 +8,6 @@ import SessionsEditorV2 from "./pages/master/SessionsEditor";
 import SessionInfo from "./pages/Sessions/Session";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Login } from "./pages/Login";
-import { RoleGuard } from "./utils/RoleGuard";
 import Characters from "./pages/characters/Characters";
 
 import Users from "./pages/master/Users";
@@ -107,149 +106,74 @@ function App() {
           <AuthProvider>
             <Suspense fallback={<div>Загрузка...</div>}>
               <Routes>
+                {/* Публичные страницы */}
                 <Route path="/" element={<MainPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/reg" element={<Reg />} />
-
-                <Route path="/sessions" element={<Sessions />} />
-                <Route path="/sessions/:id" element={<SessionInfo />} />
-                <Route path="/tools" element={<ToolsMainPage />} />
-
-                <Route
-                  path="/characters"
-                  element={
-                    <PrivateRoute>
-                      <Characters />
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route
-                  path="/characters/:id"
-                  element={
-                    <PrivateRoute>
-                      <CharacterMain />
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route
-                  path="/manage/sessions"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <ManageSessions />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/manage/sessions/:id"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <SessionsEditorV2 mode="edit" />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/manage/sessions/new"
-                  element={
-                    <RoleGuard
-                      allowedRoles={["master"]}
-                      fallback={<UnauthorizedPage />}
-                    >
-                      <SessionsEditorV2 mode="create" />
-                    </RoleGuard>
-                  }
-                />
-
-                <Route
-                  path="/manage"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <MasterPanel />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route
-                  path="/manage/users"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <Users />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route
-                  path="/manage/schemas"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <CharacterSchemas />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route
-                  path="/manage/schemas/:id"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <CharacterSchemasEditor />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route path="/tools" element={<ToolsMainPage />} />
-                <Route path="/tools/wiki" element={<WikiPage />} />
-                <Route path="/tools/wiki/:id" element={<WikiPage />} />
-                <Route
-                  path="/tools/wiki/edit/:id"
-                  element={
-                    <PrivateRoute>
-                      <RoleGuard
-                        allowedRoles={["master"]}
-                        fallback={<UnauthorizedPage />}
-                      >
-                        <MdEditor />
-                      </RoleGuard>
-                    </PrivateRoute>
-                  }
-                />
-
-                <Route path="/tools/guild" element={<GuildMainPage />} />
-                <Route path="/tools/guild/city" element={<City />} />
-                <Route path="/tools/guild/weapon" element={<GuildWeapon />} />
-                <Route path="/tools/guild/history" element={<HistoryMain />} />
-
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+                {/* Sessions */}
+                <Route path="/sessions">
+                  <Route index element={<Sessions />} />
+                  <Route path=":id" element={<SessionInfo />} />
+                </Route>
+
+                {/* Tools (открытые разделы) */}
+                <Route path="/tools">
+                  <Route index element={<ToolsMainPage />} />
+
+                  <Route path="wiki">
+                    <Route index element={<WikiPage />} />
+                    <Route path=":id" element={<WikiPage />} />
+                  </Route>
+
+                  <Route path="guild">
+                    <Route index element={<GuildMainPage />} />
+                    <Route path="city" element={<City />} />
+                    <Route path="weapon" element={<GuildWeapon />} />
+                    <Route path="history" element={<HistoryMain />} />
+                  </Route>
+                </Route>
+
+                {/* 1. Доступно любым авторизованным пользователям */}
+                <Route element={<PrivateRoute />}>
+                  <Route path="/characters">
+                    <Route index element={<Characters />} />
+                    <Route path=":id" element={<CharacterMain />} />
+                  </Route>
+
+                  {/* 2. Доступно только с ролью "master" */}
+                  <Route element={<PrivateRoute allowedRoles={["master"]} />}>
+                    {/* Единственный защищённый подраздел внутри tools */}
+                    <Route path="/tools/wiki/edit/:id" element={<MdEditor />} />
+
+                    {/* Вся панель управления */}
+                    <Route path="/manage">
+                      <Route index element={<MasterPanel />} />
+                      <Route path="users" element={<Users />} />
+
+                      <Route path="sessions">
+                        <Route index element={<ManageSessions />} />
+                        <Route
+                          path="new"
+                          element={<SessionsEditorV2 mode="create" />}
+                        />
+                        <Route
+                          path=":id"
+                          element={<SessionsEditorV2 mode="edit" />}
+                        />
+                      </Route>
+
+                      <Route path="schemas">
+                        <Route index element={<CharacterSchemas />} />
+                        <Route
+                          path=":id"
+                          element={<CharacterSchemasEditor />}
+                        />
+                      </Route>
+                    </Route>
+                  </Route>
+                </Route>
               </Routes>
             </Suspense>
           </AuthProvider>

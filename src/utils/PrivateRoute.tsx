@@ -1,30 +1,32 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 interface PrivateRouteProps {
-  children: React.ReactNode;
-  requiredRole?: string;
+  children?: React.ReactNode;
+  allowedRoles?: string[];
+  requiredRole?: string; // для обратной совместимости
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({
   children,
+  allowedRoles,
   requiredRole,
 }) => {
   const { isLoading, role: userRole } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>; // Или ваш компонент загрузки
+    return <div>Loading...</div>;
   }
 
-  // почему то при миграции на pb эта проверка всегда скидывала на login, даже если все права есть.
-  // потом займусь
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  // Сюда вернёте проверку авторизации, когда почините PocketBase:
+  // if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  if (requiredRole && userRole !== requiredRole) {
+  const roles = allowedRoles || (requiredRole ? [requiredRole] : undefined);
+
+  if (roles && (!userRole || !roles.includes(userRole))) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <>{children}</>;
+  // Если передан children — рендерим его, иначе отдаём вложенные роуты через Outlet
+  return children ? <>{children}</> : <Outlet />;
 };

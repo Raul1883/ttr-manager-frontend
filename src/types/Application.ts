@@ -1,3 +1,16 @@
+export type Application = {
+  comment: string;
+  character: string;
+  user: string;
+  session: string;
+  expand?: {
+    user?: {
+      login: string;
+      contact_info: string;
+    };
+  };
+};
+
 export type ApplicationPost = {
   session_id: number;
   character_id: number;
@@ -17,7 +30,7 @@ export interface ApplicationViaSession {
   character: string;
   comment: string;
   session: string;
-  user: "8l4verotoy9h5dd";
+  user: string;
 }
 
 export type ApplicationDataItem = {
