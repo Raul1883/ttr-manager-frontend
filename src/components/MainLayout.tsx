@@ -75,9 +75,9 @@ const AppLayout = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
   const screens = useBreakpoint();
-  
+
   // Если экран меньше "md" (768px), считаем его мобильным
-  const isMobile = screens.md === false; 
+  const isMobile = screens.md === false;
 
   const items = getHeaderItems();
   const currentKey = location.pathname.split("/")[1] || "sessions";
@@ -111,7 +111,7 @@ const AppLayout = ({
               {/* Кнопка-гамбургер для мобильных */}
               <Button
                 type="text"
-                icon={<MenuOutlined style={{ fontSize: '20px' }} />}
+                icon={<MenuOutlined style={{ fontSize: "20px" }} />}
                 onClick={() => setDrawerOpen(true)}
               />
               <Drawer
@@ -119,7 +119,7 @@ const AppLayout = ({
                 placement="right"
                 onClose={() => setDrawerOpen(false)}
                 open={drawerOpen}
-                width={280}
+                size={280}
               >
                 <Menu
                   mode="inline"

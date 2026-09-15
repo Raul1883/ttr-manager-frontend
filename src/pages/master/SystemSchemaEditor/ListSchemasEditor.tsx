@@ -139,7 +139,7 @@ export default () => {
       mutate();
       message.info("Сохранено");
     } catch (err) {
-      console.error("Invalid JSON", err);
+      console.error("Invalid JSON");
     }
   };
 

@@ -41,7 +41,6 @@ export default (props: UserEditProps) => {
       props.mutate();
       message.success(`Сохранены поля для пользователя ${props.data.login}:`);
     } catch (err) {
-      console.error("Ошибка при обновлении:", err);
       message.error("Не удалось обновить пользователя . Попробуйте снова.");
     }
   };

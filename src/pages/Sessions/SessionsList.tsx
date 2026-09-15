@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import type { SessionGet } from "../../types/Session";
 import SessionPreview from "./SessionPreview";
-import { deleteById } from "../../API/Fetcher";
 import { Empty, Space, Spin } from "antd";
 import { pb } from "../../API/PocketBase";
 

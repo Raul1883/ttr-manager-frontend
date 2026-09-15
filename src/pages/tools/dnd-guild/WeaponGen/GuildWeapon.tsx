@@ -50,7 +50,7 @@ ${props}`;
       message.success("Текст скопирован в буфер обмена");
     } catch (err) {
       message.error("Не удалось скопировать текст");
-      console.error("Ошибка копирования:", err);
+      console.error("Ошибка копирования:");
     }
   };
 

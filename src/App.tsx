@@ -29,6 +29,7 @@ import { TypewriterTheme } from "./assets/const";
 import { Applications } from "./pages/master/Applications";
 import NotFoundPage from "./pages/NotFoundPage";
 import MasterPanel from "./pages/master/MasterPanel";
+import { Necropolis } from "./pages/tools/dnd-guild/Necropolis/Necropolis";
 
 const CharacterSchemasEditor = React.lazy(
   () => import("./pages/master/SystemSchemaEditor/ListSchemasEditor"),
@@ -71,6 +72,7 @@ function App() {
                     <Route path="city" element={<City />} />
                     <Route path="weapon" element={<GuildWeapon />} />
                     <Route path="history" element={<HistoryMain />} />
+                    <Route path="necropolis" element={<Necropolis />} />
                   </Route>
                 </Route>
 

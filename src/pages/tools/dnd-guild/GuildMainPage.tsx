@@ -17,6 +17,11 @@ const items: menuItem[] = [
     path: "history",
     description: "История заданий",
   },
+    {
+    title: "Некрополь",
+    path: "necropolis",
+    description: "Истории павших",
+  },
 ];
 
 export default () => {

@@ -196,7 +196,7 @@ function FieldCard({ title, description, example }: FieldCardProps) {
         setCopied(false);
       }, 2000);
     } catch (err) {
-      console.error("Ошибка копирования:", err);
+      console.error("Ошибка копирования:");
     }
   };
 

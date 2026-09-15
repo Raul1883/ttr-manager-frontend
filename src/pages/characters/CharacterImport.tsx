@@ -24,7 +24,7 @@ export default ({ mutate }: { mutate: any }) => {
           fileInputRef.current.value = "";
         }
       } catch (err) {
-        console.error("Ошибка парсинга JSON: " + (err as Error).message);
+        console.error("Ошибка парсинга JSON");
       }
     };
 
