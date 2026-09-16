@@ -17,11 +17,12 @@ import { pb } from "../../../../API/PocketBase";
 import MainLayout from "../../../../components/MainLayout";
 import { SwrHandler } from "../../../../components/SwrHandler";
 import useApp from "antd/es/app/useApp";
-import { NecropolisEditor } from "./Murder";
+import { useAuth } from "../../../../contexts/AuthContext"; // <-- Импорт хука авторизации
+import { NecropolisEditor } from "./Murder"; // Убедитесь в правильности пути
 
 const { Title, Text, Paragraph } = Typography;
 
-interface UserExpand {
+export interface UserExpand {
   id: string;
   login: string;
   email?: string;
@@ -29,7 +30,8 @@ interface UserExpand {
   contact_info?: string;
 }
 
-interface Fallen {
+// Экспортируем интерфейс, чтобы им пользоваться в редакторе
+export interface Fallen {
   id: string;
   name: string;
   level: number;
@@ -52,15 +54,18 @@ const fetchNecropolis = async (): Promise<Fallen[]> => {
     expand: "owner",
   });
 };
+
 export function Necropolis() {
   const { data, isLoading, error, mutate } = useSWR(
     "Necropolis",
     fetchNecropolis,
   );
-  const [selectedHero, setSelectedHero] = useState<Fallen | null>(null);
-  const { message } = useApp();
 
-  /// поправить, тут бесконечные лайки
+  const [selectedHero, setSelectedHero] = useState<Fallen | null>(null);
+
+  const { message } = useApp();
+  const { user } = useAuth(); // <-- Достаем текущего пользователя для проверки прав
+
   const handleLightCandle = async (e: React.MouseEvent, hero: Fallen) => {
     e.stopPropagation();
     if (localStorage.getItem(`necropolis-${hero.id}`)) {
@@ -89,13 +94,12 @@ export function Necropolis() {
 
   return (
     <MainLayout>
-      <SwrHandler data={data} isLoading={isLoading} error={error}>
-        <div style={{ padding: "24px 16px" }}>
-          <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <Title level={2}>ЗАЛ ПАВШИХ ГЕРОЕВ</Title>
-            <NecropolisEditor mutate={mutate} />
-          </div>
-
+      <div style={{ padding: "24px 16px" }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <Title level={2}>ЗАЛ ПАВШИХ ГЕРОЕВ</Title>
+          <NecropolisEditor mutate={mutate} />
+        </div>
+        <SwrHandler data={data} isLoading={isLoading} error={error}>
           {!data?.length ? (
             <Empty description="Кладбище пусто." />
           ) : (
@@ -119,9 +123,9 @@ export function Necropolis() {
                           src={getImageUrl(hero)}
                           style={{
                             width: "100%",
-                            height: 240, // Можно настроить высоту под ваши типичные арты
+                            height: 240,
                             objectFit: "cover",
-                            objectPosition: "top center", // Чтобы голова не обрезалась
+                            objectPosition: "top center",
                             filter: "grayscale(80%)",
                           }}
                         />
@@ -135,7 +139,6 @@ export function Necropolis() {
                       >
                         {hero.name}
                       </Title>
-                      {/* Строка с расой, классом и уровнем без лишних тэгов */}
                       <Text style={{ color: "#bfbfbf" }}>
                         {hero.race.toLowerCase()} {hero.class.toLowerCase()}{" "}
                         {hero.level}
@@ -186,6 +189,24 @@ export function Necropolis() {
             open={!!selectedHero}
             onCancel={() => setSelectedHero(null)}
             centered
+            // Если текущий юзер — владелец записи, показываем кнопку редактирования в футере
+            footer={
+              selectedHero && user?.id === selectedHero.owner ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    marginTop: 16,
+                  }}
+                >
+                  <NecropolisEditor
+                    mutate={mutate}
+                    hero={selectedHero}
+                    onSuccess={() => setSelectedHero(null)}
+                  />
+                </div>
+              ) : null
+            }
           >
             {selectedHero && (
               <div>
@@ -213,7 +234,7 @@ export function Necropolis() {
                       type="secondary"
                       style={{ display: "block", marginTop: 4 }}
                     >
-                      Игрок: <b>{selectedHero.owner}</b>
+                      Игрок: <b>{selectedHero.expand?.owner?.login}</b>
                     </Text>
                   </div>
                 </Space>
@@ -239,8 +260,8 @@ export function Necropolis() {
               </div>
             )}
           </Modal>
-        </div>
-      </SwrHandler>
+        </SwrHandler>
+      </div>
     </MainLayout>
   );
 }

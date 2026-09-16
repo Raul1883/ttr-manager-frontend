@@ -1,4 +1,8 @@
-import { PlusCircleOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  PlusCircleOutlined,
+  UploadOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Modal,
@@ -9,15 +13,13 @@ import {
   Upload,
 } from "antd";
 import type { UploadFile } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { RoleGuard } from "../../../../utils/RoleGuard";
 import { pb } from "../../../../API/PocketBase";
 import useApp from "antd/es/app/useApp";
+import type { Fallen } from "./Necropolis";
 
-// Предполагается, что инстанс PocketBase импортируется откуда-то из ваших утилит
-
-// Описываем структуру данных, которые мы ожидаем получить из формы
 interface NecropolisFormValues {
   name: string;
   level: number;
@@ -28,13 +30,46 @@ interface NecropolisFormValues {
   img?: UploadFile[];
 }
 
-export function NecropolisEditor({ mutate }: { mutate: any }) {
+interface NecropolisEditorProps {
+  mutate: any;
+  hero?: Fallen; // Если передан, компонент работает в режиме редактирования
+  onSuccess?: () => void; // Колбэк для закрытия карточки после успеха
+}
+
+export function NecropolisEditor({
+  mutate,
+  hero,
+  onSuccess,
+}: NecropolisEditorProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [form] = Form.useForm<NecropolisFormValues>();
 
   const { user } = useAuth();
-  const {message} = useApp();
+  const { message } = useApp();
+
+  const isEdit = !!hero;
+
+  // Предзаполняем форму, если это редактирование
+  useEffect(() => {
+    if (open) {
+      if (isEdit && hero) {
+        form.setFieldsValue({
+          name: hero.name,
+          level: hero.level,
+          race: hero.race,
+          class: hero.class,
+          title: hero.title,
+          description: hero.description,
+          // Изображение не заполняем, чтобы не усложнять.
+          // Если файл не будет передан, PocketBase сохранит старое изображение.
+        });
+      } else {
+        form.resetFields();
+        form.setFieldsValue({ level: 1 });
+      }
+    }
+  }, [open, isEdit, hero, form]);
 
   const handleFinish = async (values: NecropolisFormValues) => {
     if (!user?.id) {
@@ -47,15 +82,13 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
       const formData = new FormData();
 
       formData.append("name", values.name);
-      // FormData принимает только строки или Blob, переводим число в строку
       formData.append("level", values.level.toString());
       formData.append("race", values.race);
       formData.append("class", values.class);
       formData.append("title", values.title || "");
       formData.append("description", values.description);
 
-      // Добавляем файл, если он есть.
-      // AntD хранит оригинальный JS File в свойстве originFileObj
+      // Добавляем файл, только если он был выбран новый
       if (values.img && values.img.length > 0) {
         const file = values.img[0].originFileObj;
         if (file) {
@@ -63,15 +96,21 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
         }
       }
 
-      // Скрытые поля
-      formData.append("owner", user.id);
-      formData.append("candles", "0"); // Передаем как строку, PocketBase сам конвертирует в number
+      if (isEdit && hero) {
+        // PocketBase (Серверная часть) также должна иметь API-правила:
+        // Update rule: @request.auth.id = owner
+        await pb.collection("tools_necropolis").update(hero.id, formData);
+        message.success("Запись успешно обновлена!");
+      } else {
+        formData.append("owner", user.id);
+        formData.append("candles", "0");
+        await pb.collection("tools_necropolis").create(formData);
+        message.success("История успешно записана!");
+      }
 
-      await pb.collection("tools_necropolis").create(formData);
       mutate();
-      message.success("История успешно записана!");
       setOpen(false);
-      form.resetFields();
+      if (onSuccess) onSuccess();
     } catch (error) {
       message.error("Произошла ошибка при сохранении");
     } finally {
@@ -79,7 +118,6 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
     }
   };
 
-  // Нормализатор для Upload компонента, с типизацией event от Ant Design
   const normFile = (e: any): UploadFile[] => {
     if (Array.isArray(e)) {
       return e;
@@ -88,15 +126,23 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
   };
 
   return (
-    <Space>
-      <RoleGuard allowedRoles={["player", "master"]}>
-        <Button icon={<PlusCircleOutlined />} onClick={() => setOpen(true)}>
-          Записать последнюю историю
+    <>
+      {isEdit ? (
+        <Button icon={<EditOutlined />} onClick={() => setOpen(true)}>
+          Редактировать
         </Button>
-      </RoleGuard>
+      ) : (
+        <Space>
+          <RoleGuard allowedRoles={["player", "master"]}>
+            <Button icon={<PlusCircleOutlined />} onClick={() => setOpen(true)}>
+              Записать последнюю историю
+            </Button>
+          </RoleGuard>
+        </Space>
+      )}
 
       <Modal
-        title="Новая запись в Некрополь"
+        title={isEdit ? "Редактирование записи" : "Новая запись в Некрополь"}
         open={open}
         onCancel={() => !loading && setOpen(false)}
         footer={null}
@@ -106,7 +152,6 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          initialValues={{ level: 1 }}
         >
           <Form.Item
             label="Имя"
@@ -165,6 +210,11 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
             name="img"
             valuePropName="fileList"
             getValueFromEvent={normFile}
+            extra={
+              isEdit
+                ? "Оставьте пустым, чтобы сохранить текущее изображение"
+                : ""
+            }
           >
             <Upload
               beforeUpload={() => false}
@@ -184,12 +234,12 @@ export function NecropolisEditor({ mutate }: { mutate: any }) {
                 Отмена
               </Button>
               <Button type="primary" htmlType="submit" loading={loading}>
-                Создать запись
+                {isEdit ? "Сохранить изменения" : "Создать запись"}
               </Button>
             </Space>
           </Form.Item>
         </Form>
       </Modal>
-    </Space>
+    </>
   );
 }
