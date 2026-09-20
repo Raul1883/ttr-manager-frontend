@@ -35,35 +35,35 @@ export default function CharacterList() {
 
   return (
     <MainLayout>
-      <SwrHandler
-        isLoading={chrIsLoading}
-        error={chrError}
-        data={characterData}
-      >
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between mb-8 gap-2">
-            <Typography.Title>Персонажи</Typography.Title>
-            <Space>
-              <RoleGuard allowedRoles={["master"]}>
-                <Button
-                  onClick={() => {
-                    setMyChars(!myChars);
-                  }}
-                >
-                  {myChars ? "Все персонажи" : "Мои персонажи"}
-                </Button>
-              </RoleGuard>
-              <CharacterImport mutate={mutate} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between mb-8 gap-2">
+          <Typography.Title>Персонажи</Typography.Title>
+          <Space>
+            <RoleGuard allowedRoles={["master"]}>
               <Button
                 onClick={() => {
-                  setIsModalOpen(true);
+                  setMyChars(!myChars);
                 }}
               >
-                + Создать персонажа
+                {myChars ? "Все персонажи" : "Мои персонажи"}
               </Button>
-            </Space>
-          </div>
+            </RoleGuard>
+            <CharacterImport mutate={mutate} />
+            <Button
+              onClick={() => {
+                setIsModalOpen(true);
+              }}
+            >
+              + Создать персонажа
+            </Button>
+          </Space>
+        </div>
 
+        <SwrHandler
+          isLoading={chrIsLoading}
+          error={chrError}
+          data={characterData}
+        >
           <Flex gap="medium" justify="" wrap>
             {characterData?.map((character) => {
               if (myChars && character.owner != user?.id) return null;
@@ -95,14 +95,14 @@ export default function CharacterList() {
               );
             })}
           </Flex>
-        </div>
+        </SwrHandler>
+      </div>
 
-        <SystemsModal
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-          mutate={mutate}
-        />
-      </SwrHandler>
+      <SystemsModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        mutate={mutate}
+      />
     </MainLayout>
   );
 }

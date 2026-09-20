@@ -43,7 +43,7 @@ export function Applications() {
       dataIndex: ["expand", "user"],
       key: "user",
       render: (user: ExpandedRecord, record) =>
-        user?.name || user?.email || record.user,
+        user?.login || user?.contact_info || record.user,
     },
     {
       title: "Персонаж",
