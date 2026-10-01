@@ -18,10 +18,12 @@ import FormItem from "antd/es/form/FormItem";
 import useApp from "antd/es/app/useApp";
 import MdLayout from "../../../components/MdLayout";
 import { useForm } from "antd/es/form/Form";
-import SaveOutlined from "@ant-design/icons/es/icons/SaveOutlined";
-import EyeOutlined from "@ant-design/icons/es/icons/EyeOutlined";
-import DeleteOutlined from "@ant-design/icons/es/icons/DeleteOutlined";
 
+// Иконки Ant Design
+import { SaveOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
+import { TiptapMarkdownEditor } from "../../../components/TiptapMarkdownEditor";
+
+// --- 2. ОСНОВНОЙ КОМПОНЕНТ ---
 const fetcher = async (id: string) => {
   try {
     const res = await pb.collection<WikiRecord>("wiki").getOne(id);
@@ -61,14 +63,14 @@ export default () => {
       </div>
     );
 
-  const hadleDelete = async () => {
+  const handleDelete = async () => {
     await pb.collection("wiki").delete(id);
     message.success("Перезагрузи страницу");
     message.success("Удалено!");
     navigate(`/tools/wiki/${id}`);
   };
 
-  const hadleSave = async (values: WikiRecordCreate) => {
+  const handleSave = async (values: WikiRecordCreate) => {
     try {
       await pb.collection("wiki").update(id, values);
       message.success("Сохранено!");
@@ -80,13 +82,19 @@ export default () => {
 
   return (
     <WikiLayout>
-      <div className="ml-4 mt-4 mx-8  mr-20">
+      <div className="ml-4 mt-4 mx-8 mr-20">
         <Typography.Title>Редактор</Typography.Title>
         {isEdit ? (
-          <Form initialValues={data} onFinish={hadleSave} form={form}>
+          <Form
+            initialValues={data}
+            onFinish={handleSave}
+            form={form}
+            layout="vertical"
+          >
             <FormItem name="title" label="Название" required>
               <Input />
             </FormItem>
+
             <FormItem name="slug" label="Путь" required>
               <Input placeholder="папка/папка/файл" />
             </FormItem>
@@ -94,24 +102,32 @@ export default () => {
             <FormItem name="isFolder" label="Папка?" valuePropName="checked">
               <Checkbox />
             </FormItem>
+
             <Typography.Title level={3}>Контент</Typography.Title>
+
+            {/* Заменили Input.TextArea на наш новый компонент */}
             <FormItem name="content">
-              <Input.TextArea autoSize />
+              <TiptapMarkdownEditor />
             </FormItem>
           </Form>
         ) : (
           <MdLayout content={form.getFieldValue("content")} />
         )}
       </div>
+
       <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
         <FloatButton
           icon={<EyeOutlined />}
           onClick={() => setIsEdit(!isEdit)}
+          tooltip={isEdit ? "Предпросмотр" : "Редактировать"}
         />
-        <FloatButton icon={<SaveOutlined />} onClick={form.submit} />
-
-        <Popconfirm title={"Точно?"} onConfirm={hadleDelete}>
-          <FloatButton icon={<DeleteOutlined />} />
+        <FloatButton
+          icon={<SaveOutlined />}
+          onClick={form.submit}
+          tooltip="Сохранить"
+        />
+        <Popconfirm title="Точно удалить?" onConfirm={handleDelete}>
+          <FloatButton icon={<DeleteOutlined />} tooltip="Удалить" />
         </Popconfirm>
       </FloatButton.Group>
     </WikiLayout>
