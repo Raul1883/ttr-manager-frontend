@@ -1,14 +1,15 @@
 {
-  "name": "client",
+  "name": "ttr-manager-client",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.7.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-schema": "node src/utils/generate-schema.js"
+    "generate-schema": "node src/utils/generate-schema.js",
+    "push": "node -e \"const v=process.argv[1]||process.env.npm_package_version; const img='raul319/ttr-manager-client:'+v; const {execSync}=require('child_process'); execSync('docker build -t '+img+' . && docker push '+img, {stdio:'inherit'})\" --"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",
