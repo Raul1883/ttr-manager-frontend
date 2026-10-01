@@ -1,73 +1,29 @@
-# React + TypeScript + Vite
+# TTR Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это небольшой пет проект, созданный для того, чтобы упростить мои и моих друзей игры в настольные ролевые.  
+Я ни на что не претендую и развиваю его в свободное время.  
+Фичи для сайта пилятся абсолютно рандомно при возникновении потребности в новом инструменте.
 
-Currently, two official plugins are available:
+## Возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Сейчас реализовано:
+- Игровые сессии: создание от роли мастера, запись от роли игроков.
+- Персонажи: полный crud + своя кастомная архитектура schema-driven рендера, потенциально от роли мастера можно создать достаточно удобный лист персонажа для любой системы (Сейчас доступны D&D5 и witcher).
+- Инструменты:
+	- Общая wiki для хранения инфы о всех домашних правилах и сеттингах в формате близком к notion.
+	- Специальные тулзы для удобной игры в собственном сеттинге гильдийских ваншотов на базе dnd5. Текущее состояние и развитие города; генератор свойств оружия и доспехов; архив заданий; некрополь с павшими в ходе игр персонажами.
+- Мастерская: спец отдел для мастеров, на данном этапе выдается только в ручную и доступен ограниченному кругу лиц.
 
-## React Compiler
+## Стек
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React + vite + ts
+- pocketbase
 
-## Expanding the ESLint configuration
+### Где попробовать?
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Попробовать можно [тут](https://ttr.dwg-art.ru/)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Как запустить локально?
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Вряд-ли этим разделом кто-то воспользуется. Если у вас есть желание вложить свой код в этот проект вы скорее всего сами разберетесь как развернуть pb под вашу систему и настроить 2 переменных окружения.  
+Либо пишите в тг `@uskvur`
