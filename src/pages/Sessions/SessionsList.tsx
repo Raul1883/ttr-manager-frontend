@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import type { SessionGet } from "../../types/Session";
 import SessionPreview from "./SessionPreview";
-import { Empty, Space, Spin } from "antd";
+import { Empty, Flex, Spin } from "antd";
 import { pb } from "../../API/PocketBase";
 
 export default ({ master = false }: { master: boolean }) => {
@@ -30,7 +30,7 @@ export default ({ master = false }: { master: boolean }) => {
     return <Empty description="Нет данных" />;
 
   return (
-    <Space wrap align="start">
+    <Flex wrap gap="large" justify="space-between">
       {sessionsData?.map((session) => (
         <SessionPreview
           key={session.id}
@@ -39,6 +39,6 @@ export default ({ master = false }: { master: boolean }) => {
           handleDelete={handleDelete}
         />
       ))}
-    </Space>
+    </Flex>
   );
 };

@@ -9,7 +9,7 @@ export default () => {
         <Typography.Title>Сессии</Typography.Title>
       </Divider>
 
-      <div className="w-full max-w-5xl">
+      <div className="w-full">
         <SessionsList master={false} />
       </div>
     </MainLayout>
