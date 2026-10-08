@@ -37,7 +37,7 @@ export default () => {
           </Typography>
         </Card>
 
-        <div className="w-full max-w-5xl">
+        <div className="w-full mt-10">
           <SessionsList master={false} />
         </div>
       </Flex>
