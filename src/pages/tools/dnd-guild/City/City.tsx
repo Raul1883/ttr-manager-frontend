@@ -6,14 +6,8 @@ import Paragraph from "antd/es/typography/Paragraph";
 import useSWR from "swr";
 import { pb } from "../../../../API/PocketBase";
 import GetPbConst from "../../../../API/GetPbConst";
+import type { CityRecord } from "./types";
 
-interface CityRecord {
-  id: string;
-  name: string;
-  level: number;
-  description: string;
-  image: string;
-}
 
 export default () => {
   const { data, isLoading, error } = useSWR<CityRecord[]>(

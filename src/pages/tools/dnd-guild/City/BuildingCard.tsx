@@ -2,22 +2,18 @@ import { useState } from "react";
 import { Card, Button, Modal, Flex, Typography, Popover } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { ProductItems } from "./ProductItems";
+import type { BuildingData } from "./types";
 
 const { Text } = Typography;
-
-export interface BuildingData {
-  name: string;
-  level: number;
-  description: string;
-  img?: string;
-}
 
 const levelToBills = [1, 3, 5, 7, 9];
 
 export default ({ data }: { data: BuildingData }) => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState<boolean>(false);
+  const [isProductsModalOpen, setIsProductsModalOpen] =
+    useState<boolean>(false);
 
-  
   return (
     <>
       <Card
@@ -43,15 +39,29 @@ export default ({ data }: { data: BuildingData }) => {
             lvl {data.level}
           </Popover>
         }
-        actions={[
-          <Button onClick={() => setIsModalOpen(true)}>Подробнее</Button>,
-        ]}
+        actions={
+          data.products
+            ? [
+                <Button onClick={() => setIsDetailsModalOpen(true)}>
+                  Подробнее
+                </Button>,
+                <Button onClick={() => setIsProductsModalOpen(true)}>
+                  Товары
+                </Button>,
+              ]
+            : [
+                <Button onClick={() => setIsDetailsModalOpen(true)}>
+                  Подробнее
+                </Button>,
+              ]
+        }
       />
 
+      {/* Модалка с описанием здания */}
       <Modal
         title={data.name}
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        open={isDetailsModalOpen}
+        onCancel={() => setIsDetailsModalOpen(false)}
         footer={null}
         width="60%"
         centered
@@ -70,6 +80,18 @@ export default ({ data }: { data: BuildingData }) => {
             </ReactMarkdown>
           </div>
         </Flex>
+      </Modal>
+
+      {/* Модалка со списком товаров */}
+      <Modal
+        title={`Товары: ${data.name}`}
+        open={isProductsModalOpen}
+        onCancel={() => setIsProductsModalOpen(false)}
+        footer={null}
+        width="50%"
+        centered
+      >
+        <ProductItems data={data} />
       </Modal>
     </>
   );
