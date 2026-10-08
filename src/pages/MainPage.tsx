@@ -8,7 +8,7 @@ export default () => {
   return (
     <MainLayout>
       <Flex vertical align="center">
-        <h1 className="text-5xl   text-7xl font-extrabold  bg-clip-text  pt-20 mb-6">
+        <h1 className="text-7xl font-extrabold  bg-clip-text  pt-20 mb-6">
           Привет!
         </h1>
 
