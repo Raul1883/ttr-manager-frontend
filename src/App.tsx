@@ -13,29 +13,29 @@ import Characters from "./pages/characters/Characters";
 import Users from "./pages/master/Users";
 import Reg from "./pages/Reg";
 import CharacterSchemas from "./pages/master/SystemSchemaEditor/ListSchemas";
-import ToolsMainPage from "./pages/tools/ToolsMainPage";
-import City from "./pages/tools/dnd-guild/City/City";
-import GuildMainPage from "./pages/tools/dnd-guild/GuildMainPage";
+
 import "antd/dist/reset.css"; // Или 'antd/dist/antd.css' для старой версии
 import { ConfigProvider, App as AppAntD } from "antd";
 import MainPage from "./pages/MainPage";
-
 import React, { Suspense } from "react";
 import CharacterMain from "./pages/characters/renderV2/CharacterMain";
-import MdEditor from "./pages/tools/wiki/MdEditor";
-import GuildWeapon from "./pages/tools/dnd-guild/WeaponGen/GuildWeapon";
-import HistoryMain from "./pages/tools/dnd-guild/History/HistoryMain";
 import { TypewriterTheme } from "./assets/const";
 import { Applications } from "./pages/master/Applications";
 import NotFoundPage from "./pages/NotFoundPage";
 import MasterPanel from "./pages/master/MasterPanel";
+
+import GuildMainPage from "./pages/tools/dnd-guild/GuildMainPage";
+import ToolsMainPage from "./pages/tools/ToolsMainPage";
+import WikiPage from "./pages/tools/wiki/WikiPage";
+import City from "./pages/tools/dnd-guild/City/City";
+import GuildWeapon from "./pages/tools/dnd-guild/WeaponGen/GuildWeapon";
+import HistoryMain from "./pages/tools/dnd-guild/History/HistoryMain";
 import { Necropolis } from "./pages/tools/dnd-guild/Necropolis/Necropolis";
 
 const CharacterSchemasEditor = React.lazy(
   () => import("./pages/master/SystemSchemaEditor/ListSchemasEditor"),
 );
-
-const WikiPage = React.lazy(() => import("./pages/tools/wiki/WikiPage"));
+const MdEditor = React.lazy(() => import("./pages/tools/wiki/MdEditor"));
 
 function App() {
   return (
