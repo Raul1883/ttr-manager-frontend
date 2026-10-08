@@ -20,4 +20,5 @@ export interface Product {
   description: string;
   name: string;
   quality: "Обычный" | "Необычный" | "Редкий" | "Очень редкий" | "Легендарный";
+  count: number;
 }

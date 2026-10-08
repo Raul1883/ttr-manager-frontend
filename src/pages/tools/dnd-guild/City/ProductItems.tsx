@@ -97,6 +97,7 @@ export function ProductItems({ data }: { data: BuildingData }) {
         >
           <Text strong>{product.name}</Text>
           <Flex gap="small">
+            <Tag>кол-во: {product.count}</Tag>
             <Tag color={getQualityColor(product.quality)}>
               {product.quality}
             </Tag>
@@ -141,7 +142,7 @@ export function ProductItems({ data }: { data: BuildingData }) {
         okText="Сохранить"
         cancelText="Отмена"
         width={700}
-        destroyOnClose
+        destroyOnHidden
       >
         <Typography.Paragraph type="secondary" className="mb-2">
           Вставьте массив объектов. Убедитесь, что свойства обернуты в двойные
@@ -152,7 +153,7 @@ export function ProductItems({ data }: { data: BuildingData }) {
           value={jsonText}
           onChange={(e) => setJsonText(e.target.value)}
           rows={15}
-          className="font-mono" // Моноширинный шрифт удобнее для кода
+          className="font-mono"
           spellCheck={false}
         />
       </Modal>
