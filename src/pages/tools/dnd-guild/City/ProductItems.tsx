@@ -29,6 +29,20 @@ const getQualityColor = (quality: Product["quality"]) => {
       return "purple";
     case "Легендарный":
       return "gold";
+    case "Низкое":
+      return "#ff7875";
+    case "Ниже среднего":
+      return "#ff9c6e";
+    case "Среднее":
+      return "green";
+    case "Хорошее":
+      return "#262626";
+    case "Отличное":
+      return "blue";
+    case "Превосходное":
+      return "purple";
+    case "Легендарное":
+      return "gold";
     default:
       return "default";
   }
