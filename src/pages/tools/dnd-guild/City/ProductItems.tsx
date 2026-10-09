@@ -8,12 +8,12 @@ import {
   Divider,
   Modal,
   Input,
-  message,
 } from "antd";
 import type { CollapseProps } from "antd";
 import { RoleGuard } from "../../../../utils/RoleGuard";
 import { pb } from "../../../../API/PocketBase";
 import type { BuildingData, Product } from "./types";
+import useApp from "antd/es/app/useApp";
 
 const { Text } = Typography;
 
@@ -34,10 +34,46 @@ const getQualityColor = (quality: Product["quality"]) => {
   }
 };
 
+const items: CollapseProps["items"] = [
+  {
+    key: "1",
+    label: "Справка",
+    children: (
+      <div>
+        <Typography.Paragraph type="secondary" className="mb-2">
+          Список товаров находиться в json с ключами:
+        </Typography.Paragraph>
+        <Typography.Paragraph
+          code
+          style={{
+            whiteSpace: "pre",
+            fontFamily: "monospace",
+          }}
+        >
+          {`[
+{
+    "cost": 95,
+    "count": 1,
+    "description": "строка",
+    "name": "строка",
+    "quality": "Обычное"
+  },
+  {...}
+]`}
+        </Typography.Paragraph>
+        <Typography.Paragraph type="secondary" className="mb-2">
+          Cost – число в золотых монетах, count число количество остатка
+        </Typography.Paragraph>
+      </div>
+    ),
+  },
+];
+
 export function ProductItems({ data }: { data: BuildingData }) {
   const [localProducts, setLocalProducts] = useState<Product[]>(
     data.products || [],
   );
+  const { message } = useApp();
 
   // Состояния для модалки и сырого JSON-текста
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -156,6 +192,7 @@ export function ProductItems({ data }: { data: BuildingData }) {
           className="font-mono"
           spellCheck={false}
         />
+        <Collapse ghost items={items} />
       </Modal>
     </div>
   );
