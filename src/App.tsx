@@ -1,3 +1,8 @@
+// шрифты
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '@fontsource/ibm-plex-mono/700.css';
+
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PrivateRoute } from "./utils/PrivateRoute";

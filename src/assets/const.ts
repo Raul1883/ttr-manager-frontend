@@ -3,8 +3,7 @@ const lightBgColor = "#fcf5e4";
 
 export const TypewriterTheme = {
   token: {
-    fontFamily: '"iA Writer Mono V", "Courier New", Courier, monospace',
-    fontFamilyCode: '"iA Writer Mono V", "Courier New", Courier, monospace',
+    fontFamily: `'IBM Plex Mono', monospace`,
 
     colorPrimary: "#979795",
     colorWarning: "#c99635",
