@@ -4,6 +4,11 @@
 (пет-проект). Этот git-репозиторий содержит **только фронтенд**; родительская
 папка `../` содержит бэкенд (PocketBase), `docker-compose.yml` и прочее.
 
+⚠️ **Бэкенд (PocketBase)**: живой инстанс работает из **Docker-образа** —
+актуальная схема БД и данные живут там. Старая папка `../` с исходниками PB —
+**legacy**, больше не используется. Не ориентируйся на неё при вопросах о
+схеме/полях коллекций; источник правды — живой инстанс.
+
 Язык интерфейса, комментариев и документации — **русский**. Сохраняй его.
 
 ## Стек
@@ -22,14 +27,14 @@
 
 ## Команды
 
-| Команда | Назначение |
-|---|---|
-| `npm run dev` | дев-сервер Vite |
-| `npm run build` | `tsc -b && vite build` — прод-сборка |
-| `npx tsc -b` | **главная проверка**: типы, must pass перед сдачей |
-| `npm run lint` | ESLint. ⚠️ ~100 предсуществующих ошибок (см. «Ловушки») — это базовая линия, не регрессия. Не добавляй новых |
-| `npm run preview` | локальный просмотр собранного `dist/` |
-| `npm run push` | docker build + push образа `raul319/ttr-manager-client:<version>` |
+| Команда           | Назначение                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`     | дев-сервер Vite                                                                                              |
+| `npm run build`   | `tsc -b && vite build` — прод-сборка                                                                         |
+| `npx tsc -b`      | **главная проверка**: типы, must pass перед сдачей                                                           |
+| `npm run lint`    | ESLint. ⚠️ ~100 предсуществующих ошибок (см. «Ловушки») — это базовая линия, не регрессия. Не добавляй новых |
+| `npm run preview` | локальный просмотр собранного `dist/`                                                                        |
+| `npm run push`    | docker build + push образа `raul319/ttr-manager-client:<version>`                                            |
 
 Тестов в проекте **нет** (vitest в планах — при появлении, писать юнит-тесты на
 чистую логику и утилиты).
@@ -78,14 +83,14 @@ Git-коммиты — короткие англоязычные (см. `git log
 
 ## Роутинг (см. `src/App.tsx`)
 
-| Путь | Доступ | Компонент |
-|---|---|---|
-| `/`, `/login`, `/reg`, `/unauthorized`, `*` | все | MainPage, Login, Reg, UnauthorizedPage, NotFoundPage |
-| `/sessions`, `/sessions/:id` | все | Sessions, SessionInfo |
-| `/tools`, `/tools/wiki[/:id]`, `/tools/guild{,/city,/weapon,/history,/necropolis}` | все | Tools/страницы wiki и гильдии |
-| `/characters`, `/characters/:id` | авторизован | Characters, CharacterMain |
-| `/tools/wiki/edit/:id` | master | MdEditor (lazy) |
-| `/manage`, `/manage/users`, `/manage/sessions{,/new,/:id}`, `/manage/applications`, `/manage/schemas[/:id]` | master | MasterPanel, Users, ManageSessions, SessionsEditor, Applications, ListSchemas(+Editor lazy) |
+| Путь                                                                                                        | Доступ      | Компонент                                                                                   |
+| ----------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------- |
+| `/`, `/login`, `/reg`, `/unauthorized`, `*`                                                                 | все         | MainPage, Login, Reg, UnauthorizedPage, NotFoundPage                                        |
+| `/sessions`, `/sessions/:id`                                                                                | все         | Sessions, SessionInfo                                                                       |
+| `/tools`, `/tools/wiki[/:id]`, `/tools/guild{,/city,/weapon,/history,/necropolis}`                          | все         | Tools/страницы wiki и гильдии                                                               |
+| `/characters`, `/characters/:id`                                                                            | авторизован | Characters, CharacterMain                                                                   |
+| `/tools/wiki/edit/:id`                                                                                      | master      | MdEditor (lazy)                                                                             |
+| `/manage`, `/manage/users`, `/manage/sessions{,/new,/:id}`, `/manage/applications`, `/manage/schemas[/:id]` | master      | MasterPanel, Users, ManageSessions, SessionsEditor, Applications, ListSchemas(+Editor lazy) |
 
 **Паттерн layout**: layout-роута нет — каждая страница сама оборачивает
 содержимое в `<MainLayout>` (`src/components/MainLayout.tsx`; пропсы
@@ -103,8 +108,12 @@ player). `getHeaderItems` вызывает `useAuth()` вне компонент
 
 ```ts
 // Чтение списка (SWR-ключ = имя коллекции или ["collection", id])
-const { data, isLoading, error, mutate } = useSWR<SessionGet[]>(["sessions"], ([url]) =>
-  pb.collection(url).getFullList({ /* expand, filter и т.п. */ }),
+const { data, isLoading, error, mutate } = useSWR<SessionGet[]>(
+  ["sessions"],
+  ([url]) =>
+    pb.collection(url).getFullList({
+      /* expand, filter и т.п. */
+    }),
 );
 
 // Простой случай — хелпер из src/API/Fetcher.ts
@@ -126,17 +135,17 @@ await pb.collection("characters").update(id, body);
 
 ### Коллекции PocketBase
 
-| Коллекция | Назначение |
-|---|---|
-| `users` | пользователи; поле `role` (`"master"` \| `"player"`); auth-коллекция |
-| `sessions` | игровые сессии (expand: `applications_via_session`, `company`, `master`, `system`, `genre`) |
-| `applications` | заявки игроков на сессии |
-| `characters` | персонажи; схема через `list_schema` (expand); данные в `data_fiels` ⚠️ |
-| `list_schemas` | схемы листов персонажей (`name` + `schema: { sections, layout }`) |
-| `wiki` | база знаний (`title`, `slug`, `content`, `isFolder`) |
-| `tools_const` | именованные константы тулзов (`name`, `string_value`, `number_value`) |
-| `tools_guild_city`, `tools_guild_history`, `tools_necropolis` | данные тулзов гильдийского сеттинга |
-| `genres`, `systems`, `companies` | справочники (через `AttributeEditor`, тип динамический) |
+| Коллекция                                                     | Назначение                                                                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `users`                                                       | пользователи; поле `role` (`"master"` \| `"player"`); auth-коллекция                        |
+| `sessions`                                                    | игровые сессии (expand: `applications_via_session`, `company`, `master`, `system`, `genre`) |
+| `applications`                                                | заявки игроков на сессии                                                                    |
+| `characters`                                                  | персонажи; схема через `list_schema` (expand); данные в `data_fields`                       |
+| `list_schemas`                                                | схемы листов персонажей (`name` + `schema: { sections, layout }`)                           |
+| `wiki`                                                        | база знаний (`title`, `slug`, `content`, `isFolder`)                                        |
+| `tools_const`                                                 | именованные константы тулзов (`name`, `string_value`, `number_value`)                       |
+| `tools_guild_city`, `tools_guild_history`, `tools_necropolis` | данные тулзов гильдийского сеттинга                                                         |
+| `genres`, `systems`, `companies`                              | справочники (через `AttributeEditor`, тип динамический)                                     |
 
 ## Авторизация и роли
 
@@ -177,47 +186,42 @@ await pb.collection("characters").update(id, body);
    `CharacterMain` (SWR `["characters", id]` с `expand=list_schema`, antd Form,
    сохранение) → `SheetLayout` (react-grid-layout) → `SectionRender` →
    `FieldRender` (switch по `field.type`) → `fields/ArrayField`.
-5. **Данные** персонажа лежат в `characters.data_fiels` (JSON-объект). Layout
+5. **Данные** персонажа лежат в `characters.data_fields` (JSON-объект). Layout
    пользователя — в localStorage: `character-layout-${id}`,
    `section_${title}_columns`, `colls.${listName}`.
 
 ## Известные ловушки (важно!)
 
-1. **`data_fiels` — опечатка в БД, а не в коде!** Поле коллекции `characters`
-   так и называется `data_fiels`. НЕ «исправляй» на `data_fields` — сломаешь
-   запись/чтение. (В `types/Character.ts` тип `CharacterGet` объявляет
-   `data_fields` — это неточность существующего типа; фактическое поле БД —
-   `data_fiels`.)
-2. **`npm run generate-schema` сломан**: `src/utils/generate-schema.js`
+1. **`npm run generate-schema` сломан**: `src/utils/generate-schema.js`
    указывает на несуществующий `src/types/CharacterSchemasTypes.ts`
    (типы теперь в `pages/characters/types/CharacterSheet.tsx`, тип
    `SystemSchemaRead` отсутствует). `system-schema.json` правится вручную либо
    скрипт чинится — не запускай сломанный скрипт, он упадёт.
-3. **Смешанный регистр папок**: `src/API/`, `src/pages/Sessions/` — капслок,
+2. **Смешанный регистр папок**: `src/API/`, `src/pages/Sessions/` — капслок,
    остальное — lowercase. Новые папки создавай **lowercase**; переименования
    существующих делать только по явной задаче (окружение разработчика может
    быть case-insensitive).
-4. **Path alias'ов нет** — только относительные импорты. Не добавляй алиасы
+3. **Path alias'ов нет** — только относительные импорты. Не добавляй алиасы
    без задачи на это.
-5. **Lint — ~100 предсуществующих ошибок** (`react-refresh/only-export-components`
+4. **Lint — ~100 предсуществующих ошибок** (`react-refresh/only-export-components`
    у анонимных default-export компонентов, `no-explicit-any`, unused vars,
    `rules-of-hooks` в MainLayout). Это базовая линия: после правок ошибок в
-   *изменённых* файлах быть не должно. `npx tsc -b` обязан проходить чисто.
-6. **`any` — ~37 случаев** (в основном `Record<string, any>` для data-полей).
+   _изменённых_ файлах быть не должно. `npx tsc -b` обязан проходить чисто.
+5. **`any` — ~37 случаев** (в основном `Record<string, any>` для data-полей).
    Не канон: в новом коде типизируй осмысленно.
-7. **tsconfig жёсткий**: `strict`, `noUnusedLocals`, `noUnusedParameters`,
+6. **tsconfig жёсткий**: `strict`, `noUnusedLocals`, `noUnusedParameters`,
    `erasableSyntaxOnly` (запрещены enum, parameter properties, namespace с
    рантаймом), `verbatimModuleSyntax` (все типы импортируй через
    `import type`).
-8. **Tailwind подключён дважды**: `index.css` (из main.tsx) и `App.css` (из
+7. **Tailwind подключён дважды**: `index.css` (из main.tsx) и `App.css` (из
    App.tsx) оба содержат `@import "tailwindcss"`. Не добавляй третий; при
    случайном дублировании стилей проверь эти файлы.
-9. **`Dockerfile` содержит устаревший `ARG/ENV VITE_API_BASE_URL`** — он никем
+8. **`Dockerfile` содержит устаревший `ARG/ENV VITE_API_BASE_URL`** — он никем
    не читается (см. «Окружение»). Можно удалить в рамках чистки, но не
    переделывай без задачи.
-10. **`../info.md`** (в родительской папке) — старое ТЗ; упоминание FastAPI
-    там устарело, бэкенд — PocketBase. Не ориентируйся на него вслепую.
-11. `src/pages/characters/types/json-source-map.d.ts` — **нужная**
+9. **`../info.md`** (в родительской папке) — старое ТЗ; упоминание FastAPI
+   там устарело, бэкенд — PocketBase. Не ориентируйся на него вслепую.
+10. `src/pages/characters/types/json-source-map.d.ts` — **нужная**
     ambient-декларация (пакет `json-source-map` без типов). Не удаляй.
 
 ## Конвенции
@@ -228,7 +232,7 @@ await pb.collection("characters").update(id, body);
   `TypewriterTheme` (`src/assets/const.ts`), не хардкодь цвета точечно, если
   тема подходит.
 - **Экспорт страниц**: предпочитай именованные default-экспорты (`export
-  default function FooPage()`), не анонимные стрелки — это убирает ошибки
+default function FooPage()`), не анонимные стрелки — это убирает ошибки
   `react-refresh/only-export-components` в новом коде.
 - **Типы**: доменные — в `src/types/`, локальные — рядом с компонентом.
   Зеркализуй структуру PB-коллекций (Preview/Read/Post), если пишешь новые.

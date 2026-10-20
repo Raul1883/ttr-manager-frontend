@@ -53,7 +53,7 @@ export default () => {
 
   const onFinish = async (values: any) => {
     const body = {
-      data_fiels: {
+      data_fields: {
         ...values,
       },
     };
@@ -77,7 +77,7 @@ export default () => {
     message.success("Сохранено");
   };
 
-  const character = data?.data_fiels;
+  const character = data?.data_fields;
   const sections = data?.expand.list_schema.schema.sections;
 
   return (

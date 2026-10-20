@@ -42,7 +42,7 @@ export default ({ mutate }: { mutate: any }) => {
     const body = {
       name: data.name,
       owner: user.id,
-      data_fiels: {
+      data_fields: {
         ...data,
       },
       list_schema: data.list_schema,

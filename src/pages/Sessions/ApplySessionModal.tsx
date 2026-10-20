@@ -3,7 +3,7 @@ import { Form, Modal, Select, Input, Alert, App } from "antd";
 import useSWR from "swr";
 import { useNavigate } from "react-router-dom";
 import { getAll } from "../../API/Fetcher";
-import type { CharacterGet } from "../../types/Character";
+import type { Character } from "../../types/Character";
 import { pb } from "../../API/PocketBase";
 import type { ApplicationPayload } from "../../types/Session";
 import { useAuth } from "../../contexts/AuthContext";
@@ -37,7 +37,7 @@ export const ApplySessionModal: React.FC<ApplySessionModalProps> = ({
     data: characterData,
     isLoading: isCharacterLoading,
     error,
-  } = useSWR<CharacterGet[]>(open ? "characters" : null, getAll);
+  } = useSWR<Pick<Character, "id" | "name">[]>(open ? "characters" : null, getAll);
 
   const handleSubmit = async () => {
     try {

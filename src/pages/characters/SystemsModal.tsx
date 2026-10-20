@@ -25,14 +25,14 @@ export default ({ isModalOpen, setIsModalOpen, mutate }: SystemModalProps) => {
   );
 
   const onFinish = async (
-    values: Omit<Character, "id" | "owner" | "data_fiels">,
+    values: Omit<Character, "id" | "owner" | "data_fields">,
   ) => {
     setIsModalOpen(false);
     form.resetFields();
 
     const body = {
       owner: user?.id,
-      data_fiels: { name: values.name },
+      data_fields: { name: values.name },
       ...values,
     };
 
