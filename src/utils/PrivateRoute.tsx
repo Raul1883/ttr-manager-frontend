@@ -12,14 +12,18 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({
   allowedRoles,
   requiredRole,
 }) => {
-  const { isLoading, role: userRole } = useAuth();
+  const { isLoading, user, role: userRole } = useAuth();
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  // Сюда вернёте проверку авторизации, когда почините PocketBase:
-  // if (!isAuthenticated) return <Navigate to="/login" replace />;
+  // Не залогинен (например, сессия закрылась после 401 или refresh) — на вход.
+  // Раньше этой проверки не было, и гость попадал на защищённые страницы,
+  // где данные не грузились (SWR-ключ вида `user ? ... : null` → вечная пустота).
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const roles = allowedRoles || (requiredRole ? [requiredRole] : undefined);
 

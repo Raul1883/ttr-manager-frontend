@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { pb } from "../API/PocketBase";
+import { pb, refreshAuth } from "../API/PocketBase";
 import type { RecordModel } from "pocketbase";
 
 interface AuthContextType {
@@ -16,23 +16,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. При монтировании обновляем токен на сервере (если есть)
+    // 1. При монтировании сверяем сессию с сервером — даже если токен уже
+    //    просрочен по клиентским часам. Раньше просроченный токен просто
+    //    пропускался, UI показал залогиненного пользователя, а все запросы
+    //    падали с 401 (лечилось только logout + login).
+    //    При 401/403/404 refreshAuth очистит стор; временный сетевой сбой
+    //    сессию не закрывает (раньше любой сбой молча разлоганивал).
     async function initAuth() {
-      if (pb.authStore.isValid) {
-        try {
-          // Обновит данные пользователя, если они изменились на сервере
-          await pb.collection("users").authRefresh();
-        } catch {
-          pb.authStore.clear();
-        }
+      if (pb.authStore.token) {
+        await refreshAuth();
       }
       setIsLoading(false);
     }
 
     initAuth();
 
-    const unsubscribe = pb.authStore.onChange((token, model) => {
-      token;
+    const unsubscribe = pb.authStore.onChange((_token, model) => {
       setUser(model);
     });
 
