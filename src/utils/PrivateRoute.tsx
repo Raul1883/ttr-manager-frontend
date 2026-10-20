@@ -4,13 +4,11 @@ import { useAuth } from "../contexts/AuthContext";
 interface PrivateRouteProps {
   children?: React.ReactNode;
   allowedRoles?: string[];
-  requiredRole?: string; // для обратной совместимости
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({
   children,
   allowedRoles,
-  requiredRole,
 }) => {
   const { isLoading, user, role: userRole } = useAuth();
 
@@ -25,7 +23,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  const roles = allowedRoles || (requiredRole ? [requiredRole] : undefined);
+  const roles = allowedRoles;
 
   if (roles && (!userRole || !roles.includes(userRole))) {
     return <Navigate to="/unauthorized" replace />;

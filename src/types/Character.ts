@@ -9,12 +9,6 @@ export type CharacterGet = {
   data_fields: Record<string, any>;
 };
 
-export type CharacterPost = {
-  name: string;
-  description: string;
-  data_fields: Record<string, any>;
-};
-
 export interface Character {
   id: string;
   name: string;

@@ -17,7 +17,6 @@ import type {
   SelectField,
 } from "../../types/CharacterSheet";
 import { useState } from "react";
-import "./arrF.css";
 
 export type ArrayFieldProps = {
   field: ArrayField;
