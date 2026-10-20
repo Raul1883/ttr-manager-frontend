@@ -14,6 +14,7 @@ import {
 import { FireOutlined, UserOutlined, ReadOutlined } from "@ant-design/icons";
 
 import { pb } from "../../../../API/PocketBase";
+import { COLLECTIONS } from "../../../../API/collections";
 import MainLayout from "../../../../components/MainLayout";
 import { SwrHandler } from "../../../../components/SwrHandler";
 import useApp from "antd/es/app/useApp";
@@ -49,7 +50,7 @@ export interface Fallen {
 }
 
 const fetchNecropolis = async (): Promise<Fallen[]> => {
-  return await pb.collection("tools_necropolis").getFullList<Fallen>({
+  return await pb.collection(COLLECTIONS.necropolis).getFullList<Fallen>({
     sort: "created",
     expand: "owner",
   });
@@ -78,7 +79,7 @@ export function Necropolis() {
     try {
       const nextCandles = (hero.candles || 0) + 1;
       await pb
-        .collection("tools_necropolis")
+        .collection(COLLECTIONS.necropolis)
         .update(hero.id, { candles: nextCandles });
 
       mutate();

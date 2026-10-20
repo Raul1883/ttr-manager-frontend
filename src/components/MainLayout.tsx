@@ -4,6 +4,7 @@ import { MenuOutlined } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { AuthButton } from "./AuthButton";
 import { useAuth } from "../contexts/AuthContext";
+import { ROLES } from "../types/Role";
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
@@ -27,7 +28,7 @@ const getHeaderItems = () => {
     ];
   }
 
-  if (userRole === "master") {
+  if (userRole === ROLES.master) {
     return [
       { key: "sessions", label: <Link to="/sessions">Игры</Link> },
       { key: "characters", label: <Link to="/characters">Персонажи</Link> },

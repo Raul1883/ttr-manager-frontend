@@ -2,6 +2,7 @@ import { Form, Input, Modal, Select, Spin } from "antd";
 import type { ListSchemaPreview } from "../../types/ListSchemasTypes";
 import useSWR from "swr";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import type { Character } from "../../types/Character";
 import { useForm } from "antd/es/form/Form";
 import { useAuth } from "../../contexts/AuthContext";
@@ -20,7 +21,7 @@ export default ({ isModalOpen, setIsModalOpen, mutate }: SystemModalProps) => {
     data: schemaData,
     isLoading: schemaIsLoading,
     error: schemaError,
-  } = useSWR<ListSchemaPreview[]>(["list_schemas"], ([url]) =>
+  } = useSWR<ListSchemaPreview[]>([COLLECTIONS.listSchemas], ([url]) =>
     pb.collection(url).getFullList({ fields: "id,name" }),
   );
 
@@ -36,7 +37,7 @@ export default ({ isModalOpen, setIsModalOpen, mutate }: SystemModalProps) => {
       ...values,
     };
 
-    await pb.collection("characters").create(body);
+    await pb.collection(COLLECTIONS.characters).create(body);
     mutate();
   };
 

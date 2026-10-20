@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { deleteById } from "../../API/Fetcher";
+import { COLLECTIONS } from "../../API/collections";
 import { useState } from "react";
 import { Button, Card, Flex, Popconfirm, Space, Typography } from "antd";
 import CharacterImport from "./CharacterImport";
@@ -12,6 +13,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import CharacterEditButton from "./CharacterEditButton";
 import { SwrHandler } from "../../components/SwrHandler";
 import { RoleGuard } from "../../utils/RoleGuard";
+import { ROLES } from "../../types/Role";
 
 export default function CharacterList() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -22,14 +24,16 @@ export default function CharacterList() {
     isLoading: chrIsLoading,
     error: chrError,
     mutate,
-  } = useSWR<Character[]>(user ? ["characters", user.id] : null, ([url]) =>
-    pb.collection(url).getFullList({
-      fields: "id,name,owner",
-    }),
+  } = useSWR<Character[]>(
+    user ? [COLLECTIONS.characters, user.id] : null,
+    ([url]) =>
+      pb.collection(url).getFullList({
+        fields: "id,name,owner",
+      }),
   );
 
   const deleteChar = async (id: string) => {
-    await deleteById(`characters`, id);
+    await deleteById(COLLECTIONS.characters, id);
     await mutate();
   };
 
@@ -39,7 +43,7 @@ export default function CharacterList() {
         <div className="flex justify-between mb-8 gap-2">
           <Typography.Title>Персонажи</Typography.Title>
           <Space>
-            <RoleGuard allowedRoles={["master"]}>
+            <RoleGuard allowedRoles={[ROLES.master]}>
               <Button
                 onClick={() => {
                   setMyChars(!myChars);

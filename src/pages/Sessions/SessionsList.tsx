@@ -3,6 +3,7 @@ import type { SessionGet } from "../../types/Session";
 import SessionPreview from "./SessionPreview";
 import { Empty, Flex, Spin } from "antd";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 
 export default ({ master = false }: { master: boolean }) => {
   const {
@@ -10,7 +11,7 @@ export default ({ master = false }: { master: boolean }) => {
     error: sessionsError,
     isLoading: isSessionsLoading,
     mutate,
-  } = useSWR<SessionGet[]>(["sessions"], ([url]) =>
+  } = useSWR<SessionGet[]>([COLLECTIONS.sessions], ([url]) =>
     pb.collection(url).getFullList({
       expand: "company,genre,system,master,applications_via_session.user",
     }),
@@ -20,7 +21,7 @@ export default ({ master = false }: { master: boolean }) => {
     const confirmDelete = window.confirm(`Точно?`);
     if (!confirmDelete) return;
 
-    await pb.collection("sessions").delete(id);
+    await pb.collection(COLLECTIONS.sessions).delete(id);
     await mutate();
   };
 

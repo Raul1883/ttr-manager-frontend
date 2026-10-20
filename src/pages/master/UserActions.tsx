@@ -12,6 +12,9 @@ import type { UserRead } from "./Users";
 import { useState } from "react";
 import useApp from "antd/es/app/useApp";
 import { deleteById, update } from "../../API/Fetcher";
+import { COLLECTIONS } from "../../API/collections";
+import type { Role } from "../../types/Role";
+import { ROLES } from "../../types/Role";
 
 interface UserEditProps {
   data: UserRead;
@@ -21,7 +24,7 @@ interface UserEditProps {
 interface FormData {
   login: string;
   contact_info: string;
-  role: "player" | "master";
+  role: Role;
 }
 
 export default (props: UserEditProps) => {
@@ -37,7 +40,7 @@ export default (props: UserEditProps) => {
 
   const updateUser = async (values: FormData) => {
     try {
-      await update("users", props.data.id, values);
+      await update(COLLECTIONS.users, props.data.id, values);
       props.mutate();
       message.success(`Сохранены поля для пользователя ${props.data.login}:`);
     } catch (err) {
@@ -46,7 +49,7 @@ export default (props: UserEditProps) => {
   };
 
   const handleDelete = (userId: string) => {
-    deleteById("users", userId);
+    deleteById(COLLECTIONS.users, userId);
     props.mutate();
   };
 
@@ -91,8 +94,8 @@ export default (props: UserEditProps) => {
           <Form.Item label="Роль" name="role" rules={[{ required: true }]}>
             <Select
               options={[
-                { value: "player", label: "player" },
-                { value: "master", label: "master" },
+                { value: ROLES.player, label: "player" },
+                { value: ROLES.master, label: "master" },
               ]}
             />
           </Form.Item>

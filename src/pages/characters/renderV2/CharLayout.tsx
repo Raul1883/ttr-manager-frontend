@@ -4,6 +4,7 @@ import { Layout } from "antd";
 import Dice from "./Dice";
 import { useNavigate } from "react-router-dom";
 import { RoleGuard } from "../../../utils/RoleGuard";
+import { ROLES } from "../../../types/Role";
 
 const { Header, Content } = Layout;
 
@@ -86,7 +87,7 @@ export default ({
             <Button onClick={saveJson}>Скачать json</Button>
             <Dice />
             <Button onClick={hadleExit}>Домой</Button>
-            <RoleGuard allowedRoles={["master"]}>
+            <RoleGuard allowedRoles={[ROLES.master]}>
               <Button onClick={copyLayout}>Copy Layout</Button>
             </RoleGuard>
           </Space>

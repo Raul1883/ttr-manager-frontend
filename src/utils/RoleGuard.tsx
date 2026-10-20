@@ -1,8 +1,9 @@
 import { useAuth } from "../contexts/AuthContext";
+import type { Role } from "../types/Role";
 
 interface RoleGuardProps {
   children: React.ReactNode;
-  allowedRoles: string[];
+  allowedRoles: Role[];
   fallback?: React.ReactNode;
 }
 

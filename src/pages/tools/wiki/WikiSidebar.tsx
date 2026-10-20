@@ -5,6 +5,7 @@ import type { MenuProps } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { buildAntdTree } from "./treeBuilder";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 import type { WikiRecord } from "./types";
 import FileTextOutlined from "@ant-design/icons/es/icons/FileTextOutlined";
 import FolderOutlined from "@ant-design/icons/es/icons/FolderOutlined";
@@ -12,6 +13,7 @@ import PlusCircleOutlined from "@ant-design/icons/es/icons/PlusCircleOutlined";
 import { RoleGuard } from "../../../utils/RoleGuard";
 import CreateModal from "./CreateModal";
 import { useAuth } from "../../../contexts/AuthContext";
+import { ROLES } from "../../../types/Role";
 
 const fetcher = (url: string) =>
   pb
@@ -33,14 +35,14 @@ export const WikiSidebar: React.FC = () => {
   const [currentNode, setCurrentNode] = useState<any>(null);
 
   const { user } = useAuth(); // получаем текущего пользователя, чтобы проверить роль
-  const isMaster = user?.role === "master";
+  const isMaster = user?.role === ROLES.master;
 
   const {
     data: paths,
     error,
     isLoading,
     mutate,
-  } = useSWR("wiki", fetcher, {
+  } = useSWR(COLLECTIONS.wiki, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 10000,
   });
@@ -147,7 +149,7 @@ export const WikiSidebar: React.FC = () => {
         <Typography.Title level={4} className="ml-4">
           TTR wiki
         </Typography.Title>
-        <RoleGuard allowedRoles={["master"]}>
+        <RoleGuard allowedRoles={[ROLES.master]}>
           <Button
             icon={<PlusCircleOutlined />}
             onClick={() => {
@@ -172,7 +174,7 @@ export const WikiSidebar: React.FC = () => {
 
       {/* Контекстное меню */}
       {menuVisible && (
-        <RoleGuard allowedRoles={["master"]}>
+        <RoleGuard allowedRoles={[ROLES.master]}>
           <Menu
             style={{
               position: "fixed",

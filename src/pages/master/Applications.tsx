@@ -3,6 +3,7 @@ import { Table } from "antd";
 import { Button, type TableColumnsType } from "antd";
 import MainLayout from "../../components/MainLayout";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import { SwrHandler } from "../../components/SwrHandler";
 import { Link } from "react-router-dom";
 import type {
@@ -12,7 +13,7 @@ import type {
 import DeleteOutlined from "@ant-design/icons/es/icons/DeleteOutlined";
 
 const fetchApplications = async (): Promise<ApplicationRecord[]> => {
-  const records = await pb.collection("applications").getFullList({
+  const records = await pb.collection(COLLECTIONS.applications).getFullList({
     sort: "-created",
     expand: "session,character,user",
   });
@@ -23,13 +24,13 @@ const deleteApplications = async (
   id: string,
   mutate: KeyedMutator<ApplicationRecord[]>,
 ) => {
-  await pb.collection("applications").delete(id);
+  await pb.collection(COLLECTIONS.applications).delete(id);
   mutate();
 };
 
 export function Applications() {
   const { data, isLoading, error, mutate } = useSWR(
-    "applications",
+    COLLECTIONS.applications,
     fetchApplications,
   );
   const columns: TableColumnsType<ApplicationRecord> = [

@@ -13,9 +13,11 @@ import {
   Typography,
 } from "antd";
 import { pb } from "../../../../API/PocketBase";
+import { COLLECTIONS } from "../../../../API/collections";
 import type { Quest } from "./HistoryMain";
 import useApp from "antd/es/app/useApp";
 import { RoleGuard } from "../../../../utils/RoleGuard";
+import { ROLES } from "../../../../types/Role";
 
 interface PanelProps {
   data: Quest[];
@@ -39,7 +41,7 @@ export default ({ data, mutate }: PanelProps) => {
         casualties: values.casualties || [],
       };
 
-      await pb.collection("tools_guild_history").create(newQuest);
+      await pb.collection(COLLECTIONS.guildHistory).create(newQuest);
       message.success("Квест успешно добавлен!");
 
       form.resetFields(); // Очищаем форму
@@ -56,7 +58,7 @@ export default ({ data, mutate }: PanelProps) => {
   // --- УДАЛЕНИЕ ЗАПИСИ ---
   const handleDelete = async (id: string) => {
     try {
-      await pb.collection("tools_guild_history").delete(id);
+      await pb.collection(COLLECTIONS.guildHistory).delete(id);
       message.success("Запись удалена");
       mutate(); // Обновляем данные
     } catch (error: any) {
@@ -157,7 +159,7 @@ export default ({ data, mutate }: PanelProps) => {
 
   return (
     <div>
-      <RoleGuard allowedRoles={["master"]}>
+      <RoleGuard allowedRoles={[ROLES.master]}>
         <Button type="primary" onClick={() => setIsOpen(true)}>
           Управление историей
         </Button>

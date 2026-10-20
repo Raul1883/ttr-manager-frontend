@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { pb, refreshAuth } from "../API/PocketBase";
 import type { RecordModel } from "pocketbase";
+import type { Role } from "../types/Role";
+import { toRole } from "../types/Role";
 
 interface AuthContextType {
   user: RecordModel | null;
-  role: string | null;
+  role: Role | null;
   isLoading: boolean;
   logout: () => void;
 }
@@ -42,8 +44,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => pb.authStore.clear();
 
-  // Допустим, роль хранится в поле 'role' коллекции users (например, "admin" | "user")
-  const role = user?.role || null;
+  // Роль лежит в поле `role` коллекции users; неизвестные значения → null
+  const role = toRole(user?.role);
 
   return (
     <AuthContext.Provider value={{ user, role, isLoading, logout }}>

@@ -21,6 +21,7 @@ import type {
 } from "../../characters/types/CharacterSheet";
 import { useUnsavedChangesWarning } from "../../../hooks/useUnsavedChangesWarning";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 import { message, Modal } from "antd";
 
 const ajv = new Ajv({
@@ -42,7 +43,7 @@ export default () => {
     isLoading,
     error,
     mutate,
-  } = useSWR<ListSchemaRead>(["list_schemas", id], ([path, id]) => {
+  } = useSWR<ListSchemaRead>([COLLECTIONS.listSchemas, id], ([path, id]) => {
     return getById(path, id as string);
   });
 
@@ -134,7 +135,7 @@ export default () => {
       if (!id) {
         return;
       }
-      await pb.collection("list_schemas").update(id, parsed);
+      await pb.collection(COLLECTIONS.listSchemas).update(id, parsed);
 
       mutate();
       message.info("Сохранено");

@@ -1,5 +1,6 @@
 import PocketBase from "pocketbase";
 import config from "../config";
+import { COLLECTIONS } from "./collections";
 
 export const pb = new PocketBase(config.pbApiUrl);
 
@@ -31,7 +32,7 @@ let refreshPromise: Promise<boolean> | null = null;
 export const refreshAuth = (): Promise<boolean> => {
   if (!refreshPromise) {
     refreshPromise = pb
-      .collection("users")
+      .collection(COLLECTIONS.users)
       .authRefresh()
       .then(() => true)
       .catch((err) => {

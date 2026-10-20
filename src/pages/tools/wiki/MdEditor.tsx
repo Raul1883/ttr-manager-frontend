@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 import type { WikiRecord, WikiRecordCreate } from "./types";
 import { WikiLayout } from "./WikiLayout";
 import { useNavigate, useParams } from "react-router-dom";
@@ -26,11 +27,11 @@ import { TiptapMarkdownEditor } from "../../../components/TiptapMarkdownEditor";
 // --- 2. ОСНОВНОЙ КОМПОНЕНТ ---
 const fetcher = async (id: string) => {
   try {
-    const res = await pb.collection<WikiRecord>("wiki").getOne(id);
+    const res = await pb.collection<WikiRecord>(COLLECTIONS.wiki).getOne(id);
     return res;
   } catch {
     const secondRes = await pb
-      .collection<WikiRecord>("wiki")
+      .collection<WikiRecord>(COLLECTIONS.wiki)
       .getFullList({ filter: `title = "${id}"` });
 
     return secondRes[0];
@@ -64,7 +65,7 @@ export default () => {
     );
 
   const handleDelete = async () => {
-    await pb.collection("wiki").delete(id);
+    await pb.collection(COLLECTIONS.wiki).delete(id);
     message.success("Перезагрузи страницу");
     message.success("Удалено!");
     navigate(`/tools/wiki/${id}`);
@@ -72,7 +73,7 @@ export default () => {
 
   const handleSave = async (values: WikiRecordCreate) => {
     try {
-      await pb.collection("wiki").update(id, values);
+      await pb.collection(COLLECTIONS.wiki).update(id, values);
       message.success("Сохранено!");
       navigate(`/tools/wiki/${id}`);
     } catch {

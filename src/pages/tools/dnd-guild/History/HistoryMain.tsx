@@ -7,6 +7,7 @@ import UserOutlined from "@ant-design/icons/es/icons/UserOutlined";
 import MoonOutlined from "@ant-design/icons/es/icons/MoonOutlined";
 import useSWR from "swr";
 import { pb } from "../../../../API/PocketBase";
+import { COLLECTIONS } from "../../../../API/collections";
 import HistoryMasterPanel from "./HistoryMasterPanel";
 
 const { Text, Paragraph, Title } = Typography;
@@ -41,7 +42,7 @@ export interface Quest {
 
 export const QuestChronologyPage: React.FC = () => {
   const { data, isLoading, error, mutate } = useSWR<Quest[]>(
-    ["tools_guild_history"],
+    [COLLECTIONS.guildHistory],
     ([coll]) => pb.collection(coll).getFullList<Quest>(),
   );
 

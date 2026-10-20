@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import useSWR from "swr";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 import { type CharacterWithSchema } from "../../../types/Character";
 import { useAuth } from "../../../contexts/AuthContext";
 import SheetLayout from "./SheetLayout";
@@ -21,7 +22,7 @@ export default () => {
   const { message } = useApp();
 
   const { data, isLoading, error, mutate } = useSWR<CharacterWithSchema>(
-    user && id ? ["characters", id] : null,
+    user && id ? [COLLECTIONS.characters, id] : null,
     ([collection, targetId]) =>
       pb.collection(collection).getOne(targetId as string, {
         expand: "list_schema",
@@ -59,7 +60,7 @@ export default () => {
     };
 
     try {
-      await pb.collection("characters").update(id, body);
+      await pb.collection(COLLECTIONS.characters).update(id, body);
       mutate();
       message.success("Сохранено");
     } catch {

@@ -1,10 +1,11 @@
 import useSWR from "swr";
 import { create, deleteById, getAll } from "../API/Fetcher";
+import { COLLECTIONS } from "../API/collections";
 import { useState, useEffect } from "react";
 import type { EntityCreate } from "../types/Entity";
 import { App, Button, Flex, Popconfirm, Select, type SelectProps } from "antd";
 
-type attributeType = "genres" | "systems" | "companies";
+type attributeType = typeof COLLECTIONS.genres | typeof COLLECTIONS.systems | typeof COLLECTIONS.companies;
 
 type Entity = {
   id: string;
@@ -20,19 +21,16 @@ interface AttributeEditorProps {
 
 const typeToStr = (value: attributeType) => {
   const typeToStr = {
-    genres: "Жанр",
-    systems: "Система",
-    companies: "Компания",
+    [COLLECTIONS.genres]: "Жанр",
+    [COLLECTIONS.systems]: "Система",
+    [COLLECTIONS.companies]: "Компания",
   };
 
   return typeToStr[value];
 };
 
 export default ({ type, value, onChange }: AttributeEditorProps) => {
-  const { data, isLoading, error, mutate } = useSWR<Entity[]>(
-    `${type}`,
-    getAll,
-  );
+  const { data, isLoading, error, mutate } = useSWR<Entity[]>(type, getAll);
   const [options, setOptions] = useState<SelectProps["options"]>([]);
   const { message } = App.useApp();
 
@@ -52,7 +50,7 @@ export default ({ type, value, onChange }: AttributeEditorProps) => {
     }
 
     try {
-      await deleteById(`${type}`, value);
+      await deleteById(type, value);
       await mutate();
       message.destroy("Удалено");
 
@@ -83,10 +81,7 @@ export default ({ type, value, onChange }: AttributeEditorProps) => {
     } else {
       try {
         const newEntity: EntityCreate = { name: inputValue };
-        const createdEntity = await create<EntityCreate, Entity>(
-          `${type}`,
-          newEntity,
-        );
+        const createdEntity = await create<EntityCreate, Entity>(type, newEntity);
 
         await mutate();
 

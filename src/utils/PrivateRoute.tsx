@@ -1,9 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import type { Role } from "../types/Role";
 
 interface PrivateRouteProps {
   children?: React.ReactNode;
-  allowedRoles?: string[];
+  allowedRoles?: Role[];
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({

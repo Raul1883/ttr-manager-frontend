@@ -45,7 +45,7 @@
 значит `tsc -b` проверяет и их). Импорт — явный
 (`import { describe, it, expect } from "vitest"`), глобали не используются.
 Примеры-образцы: `src/utils/remarkWikiLinks.test.ts`,
-`src/pages/tools/wiki/treeBuilder.test.ts`.
+`src/pages/tools/wiki/treeBuilder.test.ts`, `src/types/Role.test.ts`.
 
 ## Окружение
 
@@ -65,6 +65,7 @@ src/
 ├── API/                  # доступ к PocketBase
 │   ├── PocketBase.ts     # синглтон pb + авто-рефреш токена (beforeSend/afterSend)
 │   ├── Fetcher.ts        # generic CRUD: create/getAll/getById/update/deleteById
+│   ├── collections.ts    # COLLECTIONS — единственное место с именами коллекций
 │   └── GetPbConst.tsx    # фетчер констант из tools_const (SWR-ключ ["tools_const", name])
 ├── assets/               # svg/webp + const.ts (тема antd)
 ├── components/           # переиспользуемые: MainLayout, Menu, SwrHandler, MdLayout,
@@ -79,7 +80,7 @@ src/
 │   ├── characters/       # список/импорт персонажей, renderV2/ (рендер листа),
 │   │                     #   types/CharacterSheet.tsx, schemas/system-schema.json
 │   └── tools/            # wiki/ и dnd-guild/ (город, оружие, история, некрополь)
-├── types/                # доменные типы: Character, Session, Application, Entity, ListSchemasTypes
+├── types/                # доменные типы: Character, Session, Application, Entity, ListSchemasTypes, Role
 ├── utils/                # PrivateRoute, RoleGuard, DownloadJSON, remarkWikiLinks,
 │                         #   generate-schema.js (⚠️ сломан, см. «Ловушки»)
 ├── App.tsx               # ВСЕ маршруты и гарды — единственный источник правды
@@ -112,12 +113,13 @@ player). `getHeaderItems` вызывает `useAuth()` вне компонент
 
 ## Доступ к данным
 
-Канонический паттерн — **чтение через SWR, запись через `pb.collection()`**:
+Канонический паттерн — **чтение через SWR, запись через `pb.collection()`**.
+Имена коллекций берутся из `COLLECTIONS` (`src/API/collections.ts`), а не строками:
 
 ```ts
 // Чтение списка (SWR-ключ = имя коллекции или ["collection", id])
 const { data, isLoading, error, mutate } = useSWR<SessionGet[]>(
-  ["sessions"],
+  [COLLECTIONS.sessions],
   ([url]) =>
     pb.collection(url).getFullList({
       /* expand, filter и т.п. */
@@ -125,12 +127,16 @@ const { data, isLoading, error, mutate } = useSWR<SessionGet[]>(
 );
 
 // Простой случай — хелпер из src/API/Fetcher.ts
-useSWR<UserRead[]>("users", getAll);
+useSWR<UserRead[]>(COLLECTIONS.users, getAll);
 
 // Запись
-await pb.collection("characters").update(id, body);
+await pb.collection(COLLECTIONS.characters).update(id, body);
 ```
 
+- **Новая коллекция** → добавь ключ в `COLLECTIONS`, потом используй. Никогда не
+  пиши имя коллекции строковым литералом: литерал в `pb.collection(...)`/SWR-ключе —
+  это ошибка ревью. Тип `CollectionName` (из `collections.ts`) ограничивает
+  аргументы `Fetcher.ts` и принимает только известные имена.
 - SWR-ключ всегда соответствует коллекции — это даёт автоматическую
   инвалидацию/дедупликацию. `requestKey: null` отключает авто-отмену запроса
   (см. City.tsx).
@@ -158,8 +164,8 @@ await pb.collection("characters").update(id, body);
 ## Авторизация и роли
 
 - `src/contexts/AuthContext.tsx` — `useAuth()` → `{ user, role, isLoading, logout }`.
-  `user` — `RecordModel` PocketBase, `role = user?.role`. `AuthProvider` не
-  рендерит детей, пока `isLoading`.
+  `user` — `RecordModel` PocketBase, `role = toRole(user?.role)` (тип `Role | null`).
+  `AuthProvider` не рендерит детей, пока `isLoading`.
 - `src/API/PocketBase.ts` — глобальная поддержка свежести сессии: просроченный
   токен освежается перед запросом (`beforeSend`), страховка по 401 (`afterSend`),
   `refreshAuth()` дедуплицирует параллельные обновления. **Не изобретай свою
@@ -170,9 +176,11 @@ await pb.collection("characters").update(id, body);
     роли, иначе редирект на `/unauthorized`; гость → `/login`.
   - `RoleGuard` (`src/utils/RoleGuard.tsx`) — инлайн-обёртка UI-элементов с
     `fallback`.
-- Роли — **строки** `"master"` и `"player"` (типа-union в коде нет; сравнения
-  вида `user?.role === "master"` разбросаны по коду). Новая роль потребует
-  правок в `App.tsx`, `MainLayout.getHeaderItems()` и всех точках сравнения.
+- Роли — `ROLES.master` / `ROLES.player` и тип `Role` из `src/types/Role.ts`;
+  неизвестное значение из PB → `null` через `toRole()`. Не сравнивай
+  `user?.role` со строковыми литералами и не передавай в `allowedRoles`
+  литералы `["master"]` — только `[ROLES.master]`. Новая роль = правка
+  `ROLES`/`toRole` + пунктов меню в `MainLayout.getHeaderItems()`.
 
 ## Schema-driven листы персонажей
 
@@ -231,6 +239,8 @@ await pb.collection("characters").update(id, body);
    там устарело, бэкенд — PocketBase. Не ориентируйся на него вслепую.
 10. `src/pages/characters/types/json-source-map.d.ts` — **нужная**
     ambient-декларация (пакет `json-source-map` без типов). Не удаляй.
+11. **`data_fiels`** — старая опечатка в имени поля, уже исправлена в БД
+    (`data_fields`) и в коде. Если встретишь `data_fiels` — это баг, а не схема.
 
 ## Конвенции
 
@@ -249,9 +259,11 @@ default function FooPage()`), не анонимные стрелки — это 
 
 1. Компонент в `src/pages/<раздел>/`, обёрнутый в `<MainLayout>`.
 2. Роут в `src/App.tsx` (в подходящую ветку `PrivateRoute`, при необходимости
-   `allowedRoles={["master"]}`).
+   `allowedRoles={[ROLES.master]}`).
 3. Пункт меню в `src/components/MainLayout.tsx` → `getHeaderItems()`
    (в нужные role-ветки).
-4. Типы данных в `src/types/`.
-5. Чтение — SWR, запись — `pb.collection()`.
-6. Проверка: `npx tsc -b` чисто, ошибок линта в новых файлах нет.
+4. Типы данных в `src/types/`, имя коллекции — в `COLLECTIONS`
+   (`src/API/collections.ts`), если коллекция новая.
+5. Чтение — SWR, запись — `pb.collection(COLLECTIONS.x)`.
+6. Проверка: `npx tsc -b` чисто, `npm run test` зелёный, ошибок линта в новых
+   файлах нет.

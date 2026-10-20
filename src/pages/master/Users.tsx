@@ -1,14 +1,17 @@
 import useSWR from "swr";
 import { getAll } from "../../API/Fetcher";
+import { COLLECTIONS } from "../../API/collections";
 import MainLayout from "../../components/MainLayout";
 import { Table, Tag, type TableProps } from "antd";
 import UserActions from "./UserActions";
+import type { Role } from "../../types/Role";
+import { ROLES } from "../../types/Role";
 
 export interface UserRead {
   id: string;
   login: string;
   contact_info?: string | null;
-  role: string;
+  role: Role;
 }
 
 export default () => {
@@ -17,7 +20,7 @@ export default () => {
     error,
     isLoading,
     mutate,
-  } = useSWR<UserRead[]>("users", getAll, {
+  } = useSWR<UserRead[]>(COLLECTIONS.users, getAll, {
     revalidateOnFocus: false,
   });
 
@@ -73,7 +76,7 @@ export default () => {
       dataIndex: "role",
       key: "role",
       render: (text) => (
-        <Tag color={text == "master" ? "blue" : "green"}>{text}</Tag>
+        <Tag color={text == ROLES.master ? "blue" : "green"}>{text}</Tag>
       ),
     },
     {

@@ -16,6 +16,7 @@ import {
 import MainLayout from "../../components/MainLayout";
 import { ApplySessionModal } from "./ApplySessionModal";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import { useAuth } from "../../contexts/AuthContext";
 import useApp from "antd/es/app/useApp";
 
@@ -30,10 +31,12 @@ export default () => {
     error: sessionError,
     isLoading: isSessionLoading,
     mutate: mutateSession,
-  } = useSWR<SessionGet>(id ? ["sessions", id] : null, ([url, targetId]) =>
-    pb.collection(url).getOne(targetId as string, {
-      expand: "company,genre,system,master,applications_via_session.user",
-    }),
+  } = useSWR<SessionGet>(
+    id ? [COLLECTIONS.sessions, id] : null,
+    ([url, targetId]) =>
+      pb.collection(url).getOne(targetId as string, {
+        expand: "company,genre,system,master,applications_via_session.user",
+      }),
   );
 
   if (sessionError) {
@@ -61,7 +64,7 @@ export default () => {
   const deleteApplication = async () => {
     if (myApplication)
       try {
-        await pb.collection("applications").delete(myApplication.id);
+        await pb.collection(COLLECTIONS.applications).delete(myApplication.id);
         mutateSession();
         message.success("удалено!");
       } catch {

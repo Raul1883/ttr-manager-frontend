@@ -21,6 +21,7 @@ import {
 } from "antd";
 import type { ListSchema } from "../../characters/types/CharacterSheet";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 
 export default () => {
   const [newName, setNewName] = useState<string>("");
@@ -28,7 +29,7 @@ export default () => {
   const navigate = useNavigate();
 
   const { data, isLoading, error, mutate } = useSWR<ListSchemaPreview[]>(
-    "list_schemas",
+    COLLECTIONS.listSchemas,
     getAll,
   );
 
@@ -54,7 +55,7 @@ export default () => {
   }
 
   const handleDelete = async (id: string) => {
-    await deleteById("list_schemas", id);
+    await deleteById(COLLECTIONS.listSchemas, id);
     mutate();
   };
 
@@ -74,7 +75,7 @@ export default () => {
       },
     };
 
-    await pb.collection("list_schemas").create(body);
+    await pb.collection(COLLECTIONS.listSchemas).create(body);
     mutate();
   };
 

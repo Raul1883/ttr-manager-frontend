@@ -3,6 +3,7 @@ import type { Character } from "../../types/Character";
 import { useState } from "react";
 import EditOutlined from "@ant-design/icons/es/icons/EditOutlined";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import useApp from "antd/es/app/useApp";
 
 interface CharModalProps {
@@ -20,7 +21,7 @@ export default ({ character, mutate }: CharModalProps) => {
       name: name,
     };
     try {
-      await pb.collection("characters").update(character.id, body);
+      await pb.collection(COLLECTIONS.characters).update(character.id, body);
       mutate();
       message.success("Успешно!");
       setModal(false);

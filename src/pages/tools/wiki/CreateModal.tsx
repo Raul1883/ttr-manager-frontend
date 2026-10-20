@@ -4,6 +4,7 @@ import FormItem from "antd/es/form/FormItem";
 import { useForm } from "antd/es/form/Form";
 import useApp from "antd/es/app/useApp";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
@@ -47,7 +48,7 @@ export default ({ isModalOpen, closeModal, mutate, slug }: ModalProps) => {
       content: "",
     };
 
-    const res = await pb.collection<WikiRecord>("wiki").create(payload);
+    const res = await pb.collection<WikiRecord>(COLLECTIONS.wiki).create(payload);
     message.success("Создано!");
     navigate(`/tools/wiki/edit/${res.id}`);
     mutate();

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getAll } from "../../API/Fetcher";
 import type { Character } from "../../types/Character";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import type { ApplicationPayload } from "../../types/Session";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -37,7 +38,10 @@ export const ApplySessionModal: React.FC<ApplySessionModalProps> = ({
     data: characterData,
     isLoading: isCharacterLoading,
     error,
-  } = useSWR<Pick<Character, "id" | "name">[]>(open ? "characters" : null, getAll);
+  } = useSWR<Pick<Character, "id" | "name">[]>(
+    open ? COLLECTIONS.characters : null,
+    getAll,
+  );
 
   const handleSubmit = async () => {
     try {
@@ -56,9 +60,9 @@ export const ApplySessionModal: React.FC<ApplySessionModalProps> = ({
 
 
       if (myApplication) {
-        await pb.collection("applications").update(myApplication.id, body);
+        await pb.collection(COLLECTIONS.applications).update(myApplication.id, body);
       } else {
-        await pb.collection("applications").create(body);
+        await pb.collection(COLLECTIONS.applications).create(body);
       }
 
       message.success("Заявка успешно создана");

@@ -14,6 +14,8 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { pb } from "../API/PocketBase";
+import { COLLECTIONS } from "../API/collections";
+import { ROLES } from "../types/Role";
 
 // interface RegistrationData {
 //   login: string;
@@ -41,7 +43,7 @@ export default () => {
     setError(null);
 
     try {
-      await pb.collection("users").create({ role: "player", ...values });
+      await pb.collection(COLLECTIONS.users).create({ role: ROLES.player, ...values });
       form.resetFields();
 
       modal.success({

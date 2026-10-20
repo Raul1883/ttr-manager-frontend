@@ -1,20 +1,22 @@
 import useSWR from "swr";
 import { useParams } from "react-router-dom";
 import { pb } from "../../../API/PocketBase";
+import { COLLECTIONS } from "../../../API/collections";
 import type { WikiRecord } from "./types";
 import NavButton from "../../../components/NavButton";
 import EditOutlined from "@ant-design/icons/es/icons/EditOutlined";
 import { Empty, Skeleton, Space, Tag } from "antd";
 import { RoleGuard } from "../../../utils/RoleGuard";
+import { ROLES } from "../../../types/Role";
 import MdLayout from "../../../components/MdLayout";
 
 const fetcher = async (id: string) => {
   try {
-    const res = await pb.collection<WikiRecord>("wiki").getOne(id);
+    const res = await pb.collection<WikiRecord>(COLLECTIONS.wiki).getOne(id);
     return res;
   } catch {
     const secondRes = await pb
-      .collection<WikiRecord>("wiki")
+      .collection<WikiRecord>(COLLECTIONS.wiki)
       .getFullList({ filter: `title = "${id}"` });
 
     return secondRes[0];
@@ -45,7 +47,7 @@ export default () => {
         <div></div>
         <Space align="center">
           <Tag>{data?.slug}</Tag>
-          <RoleGuard allowedRoles={["master"]}>
+          <RoleGuard allowedRoles={[ROLES.master]}>
             <NavButton to={`/tools/wiki/edit/${id}`} icon={<EditOutlined />} />
           </RoleGuard>
         </Space>

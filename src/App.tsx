@@ -6,6 +6,7 @@ import '@fontsource/ibm-plex-mono/700.css';
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PrivateRoute } from "./utils/PrivateRoute";
+import { ROLES } from "./types/Role";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import Sessions from "./pages/Sessions/Sessions";
 import ManageSessions from "./pages/master/ManageSessions";
@@ -89,7 +90,9 @@ function App() {
                   </Route>
 
                   {/* 2. Доступно только с ролью "master" */}
-                  <Route element={<PrivateRoute allowedRoles={["master"]} />}>
+                  <Route
+                    element={<PrivateRoute allowedRoles={[ROLES.master]} />}
+                  >
                     {/* Единственный защищённый подраздел внутри tools */}
                     <Route path="/tools/wiki/edit/:id" element={<MdEditor />} />
 

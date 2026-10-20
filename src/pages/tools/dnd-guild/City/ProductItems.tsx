@@ -12,8 +12,10 @@ import {
 import type { CollapseProps } from "antd";
 import { RoleGuard } from "../../../../utils/RoleGuard";
 import { pb } from "../../../../API/PocketBase";
+import { COLLECTIONS } from "../../../../API/collections";
 import type { BuildingData, Product } from "./types";
 import useApp from "antd/es/app/useApp";
+import { ROLES } from "../../../../types/Role";
 
 const { Text } = Typography;
 
@@ -119,7 +121,7 @@ export function ProductItems({ data }: { data: BuildingData }) {
     // 2. Отправляем на сервер
     setIsSaving(true);
     try {
-      await pb.collection("tools_guild_city").update(data.id, {
+      await pb.collection(COLLECTIONS.guildCity).update(data.id, {
         products: parsedProducts,
       });
 
@@ -167,7 +169,7 @@ export function ProductItems({ data }: { data: BuildingData }) {
 
   return (
     <div className="max-h-[70vh] overflow-y-auto pt-4">
-      <RoleGuard allowedRoles={["master"]}>
+      <RoleGuard allowedRoles={[ROLES.master]}>
         <div className="mb-4">
           <Button type="primary" onClick={handleOpenEdit}>
             Редактировать JSON

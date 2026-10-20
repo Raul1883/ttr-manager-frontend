@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
 import { getById } from "../../API/Fetcher";
+import type { CollectionName } from "../../API/collections";
 import type { SessionGet, SessionPost } from "../../types/Session";
 import AttributeEditor from "../../components/AttributeEditor";
 import MainLayout from "../../components/MainLayout";
 import { App, Button, Card, Form, Input } from "antd";
 import NavButton from "../../components/NavButton";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import { useAuth } from "../../contexts/AuthContext";
 
 interface SessionFormProps {
@@ -23,8 +25,9 @@ export default ({ mode }: SessionFormProps) => {
   const { user } = useAuth();
 
   const { data, error, isLoading, mutate } = useSWR<SessionGet>(
-    isEditMode && id ? ["sessions", id] : null,
-    ([url, targetId]) => getById<SessionGet>(url as string, targetId as string),
+    isEditMode && id ? [COLLECTIONS.sessions, id] : null,
+    ([url, targetId]) =>
+      getById<SessionGet>(url as CollectionName, targetId as string),
   );
 
   useEffect(() => {
@@ -49,14 +52,14 @@ export default ({ mode }: SessionFormProps) => {
 
       if (isEditMode && id) {
         const response: SessionGet = await pb
-          .collection("sessions")
+          .collection(COLLECTIONS.sessions)
           .update(id, body);
 
         mutate(response);
 
         message.success("Успешно!");
       } else {
-        await pb.collection("sessions").create(body);
+        await pb.collection(COLLECTIONS.sessions).create(body);
         message.success("Успешно!");
       }
       navigate("/manage/sessions");
@@ -119,7 +122,7 @@ export default ({ mode }: SessionFormProps) => {
             name="genre"
             rules={[{ required: true, message: "Выберите жанр" }]}
           >
-            <AttributeEditor type="genres" />
+            <AttributeEditor type={COLLECTIONS.genres} />
           </Form.Item>
 
           <Form.Item<SessionPost>
@@ -127,7 +130,7 @@ export default ({ mode }: SessionFormProps) => {
             name="system"
             rules={[{ required: true, message: "Выберите систему" }]}
           >
-            <AttributeEditor type="systems" />
+            <AttributeEditor type={COLLECTIONS.systems} />
           </Form.Item>
 
           <Form.Item<SessionPost>
@@ -135,7 +138,7 @@ export default ({ mode }: SessionFormProps) => {
             name="company"
             rules={[{ required: true, message: "Выберите компанию" }]}
           >
-            <AttributeEditor type="companies" />
+            <AttributeEditor type={COLLECTIONS.companies} />
           </Form.Item>
         </Card>
       </Form>

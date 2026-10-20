@@ -5,18 +5,19 @@ import Title from "antd/es/typography/Title";
 import Paragraph from "antd/es/typography/Paragraph";
 import useSWR from "swr";
 import { pb } from "../../../../API/PocketBase";
+import { COLLECTIONS } from "../../../../API/collections";
 import GetPbConst from "../../../../API/GetPbConst";
 import type { CityRecord } from "./types";
 
 
 export default () => {
   const { data, isLoading, error } = useSWR<CityRecord[]>(
-    ["tools_guild_city"],
+    [COLLECTIONS.guildCity],
     ([url]) => pb.collection(url).getFullList({ requestKey: null }),
   );
 
   const { data: billsCount } = useSWR(
-    ["tools_const", "guild_bills_count"],
+    [COLLECTIONS.toolsConst, "guild_bills_count"],
     GetPbConst,
   );
 

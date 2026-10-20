@@ -17,8 +17,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { RoleGuard } from "../../../../utils/RoleGuard";
 import { pb } from "../../../../API/PocketBase";
+import { COLLECTIONS } from "../../../../API/collections";
 import useApp from "antd/es/app/useApp";
 import type { Fallen } from "./Necropolis";
+import { ROLES } from "../../../../types/Role";
 
 interface NecropolisFormValues {
   name: string;
@@ -99,12 +101,12 @@ export function NecropolisEditor({
       if (isEdit && hero) {
         // PocketBase (Серверная часть) также должна иметь API-правила:
         // Update rule: @request.auth.id = owner
-        await pb.collection("tools_necropolis").update(hero.id, formData);
+        await pb.collection(COLLECTIONS.necropolis).update(hero.id, formData);
         message.success("Запись успешно обновлена!");
       } else {
         formData.append("owner", user.id);
         formData.append("candles", "0");
-        await pb.collection("tools_necropolis").create(formData);
+        await pb.collection(COLLECTIONS.necropolis).create(formData);
         message.success("История успешно записана!");
       }
 
@@ -133,7 +135,7 @@ export function NecropolisEditor({
         </Button>
       ) : (
         <Space>
-          <RoleGuard allowedRoles={["player", "master"]}>
+          <RoleGuard allowedRoles={[ROLES.player, ROLES.master]}>
             <Button icon={<PlusCircleOutlined />} onClick={() => setOpen(true)}>
               Записать последнюю историю
             </Button>

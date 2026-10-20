@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Input, Button, Typography, Alert, Layout, Card } from "antd";
 import { pb } from "../API/PocketBase";
+import { COLLECTIONS } from "../API/collections";
 
 const { Title } = Typography;
 
@@ -17,7 +18,7 @@ export const Login: React.FC = () => {
 
     try {
       await pb
-        .collection("users")
+        .collection(COLLECTIONS.users)
         .authWithPassword(values.login, values.password);
       navigate("/");
     } catch (err: any) {

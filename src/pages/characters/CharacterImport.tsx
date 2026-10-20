@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 
 import { Button } from "antd";
 import { pb } from "../../API/PocketBase";
+import { COLLECTIONS } from "../../API/collections";
 import { useAuth } from "../../contexts/AuthContext";
 import useApp from "antd/es/app/useApp";
 
@@ -49,7 +50,7 @@ export default ({ mutate }: { mutate: any }) => {
     };
 
     try {
-      await pb.collection("characters").create(body);
+      await pb.collection(COLLECTIONS.characters).create(body);
       mutate();
     } catch {
       message.error("Что-то пошло не так. Уникальное имя? Старая версия?");
