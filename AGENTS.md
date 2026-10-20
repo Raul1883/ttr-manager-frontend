@@ -81,8 +81,7 @@ src/
 │   │                     #   types/CharacterSheet.tsx, schemas/system-schema.json
 │   └── tools/            # wiki/ и dnd-guild/ (город, оружие, история, некрополь)
 ├── types/                # доменные типы: Character, Session, Application, Entity, ListSchemasTypes, Role
-├── utils/                # PrivateRoute, RoleGuard, DownloadJSON, remarkWikiLinks,
-│                         #   generate-schema.js (⚠️ сломан, см. «Ловушки»)
+├── utils/                # PrivateRoute, RoleGuard, DownloadJSON, remarkWikiLinks
 ├── App.tsx               # ВСЕ маршруты и гарды — единственный источник правды
 ├── config.tsx            # config.pbApiUrl
 └── main.tsx / index.css / App.css   # ⚠️ оба CSS импортируют tailwindcss
@@ -192,8 +191,11 @@ await pb.collection(COLLECTIONS.characters).update(id, body);
    `Section { title, fields, layout?, columns? }`, `ListSchema`.
 2. **JSON-схема для линтинга редактора** —
    `src/pages/characters/schemas/system-schema.json` (валидируется ajv в
-   CodeMirror-linter'е). При изменении типов схему надо обновить вручную или
-   починить `npm run generate-schema` (сейчас сломан — см. «Ловушки»).
+   CodeMirror-linter'е). Генератора нет — схема **правится вручную** и должна
+   синхронно следовать типам из `CharacterSheet.tsx`. Расхождение = ложные
+   ошибки/пропуски в редакторе.
+   ⚠️ Поля `key` в схеме листа **нет** — идентификатор поля это его `label`
+   (уникальность `label` проверяет редактор).
 3. **Редактор** — `src/pages/master/SystemSchemaEditor/`:
    `ListSchemas.tsx` (список/CRUD), `ListSchemasEditor.tsx` (CodeMirror + ajv +
    `json-source-map` для позиции ошибок; `useUnsavedChangesWarning`), `Help.tsx`
@@ -208,38 +210,33 @@ await pb.collection(COLLECTIONS.characters).update(id, body);
 
 ## Известные ловушки (важно!)
 
-1. **`npm run generate-schema` сломан**: `src/utils/generate-schema.js`
-   указывает на несуществующий `src/types/CharacterSchemasTypes.ts`
-   (типы теперь в `pages/characters/types/CharacterSheet.tsx`, тип
-   `SystemSchemaRead` отсутствует). `system-schema.json` правится вручную либо
-   скрипт чинится — не запускай сломанный скрипт, он упадёт.
-2. **Смешанный регистр папок**: `src/API/`, `src/pages/Sessions/` — капслок,
+1. **Смешанный регистр папок**: `src/API/`, `src/pages/Sessions/` — капслок,
    остальное — lowercase. Новые папки создавай **lowercase**; переименования
    существующих делать только по явной задаче (окружение разработчика может
    быть case-insensitive).
-3. **Path alias'ов нет** — только относительные импорты. Не добавляй алиасы
+2. **Path alias'ов нет** — только относительные импорты. Не добавляй алиасы
    без задачи на это.
-4. **Lint — ~100 предсуществующих ошибок** (`react-refresh/only-export-components`
+3. **Lint — ~100 предсуществующих ошибок** (`react-refresh/only-export-components`
    у анонимных default-export компонентов, `no-explicit-any`, unused vars,
    `rules-of-hooks` в MainLayout). Это базовая линия: после правок ошибок в
    _изменённых_ файлах быть не должно. `npx tsc -b` обязан проходить чисто.
-5. **`any` — ~37 случаев** (в основном `Record<string, any>` для data-полей).
+4. **`any` — ~37 случаев** (в основном `Record<string, any>` для data-полей).
    Не канон: в новом коде типизируй осмысленно.
-6. **tsconfig жёсткий**: `strict`, `noUnusedLocals`, `noUnusedParameters`,
+5. **tsconfig жёсткий**: `strict`, `noUnusedLocals`, `noUnusedParameters`,
    `erasableSyntaxOnly` (запрещены enum, parameter properties, namespace с
    рантаймом), `verbatimModuleSyntax` (все типы импортируй через
    `import type`).
-7. **Tailwind подключён дважды**: `index.css` (из main.tsx) и `App.css` (из
+6. **Tailwind подключён дважды**: `index.css` (из main.tsx) и `App.css` (из
    App.tsx) оба содержат `@import "tailwindcss"`. Не добавляй третий; при
    случайном дублировании стилей проверь эти файлы.
-8. **`Dockerfile` содержит устаревший `ARG/ENV VITE_API_BASE_URL`** — он никем
+7. **`Dockerfile` содержит устаревший `ARG/ENV VITE_API_BASE_URL`** — он никем
    не читается (см. «Окружение»). Можно удалить в рамках чистки, но не
    переделывай без задачи.
-9. **`../info.md`** (в родительской папке) — старое ТЗ; упоминание FastAPI
+8. **`../info.md`** (в родительской папке) — старое ТЗ; упоминание FastAPI
    там устарело, бэкенд — PocketBase. Не ориентируйся на него вслепую.
-10. `src/pages/characters/types/json-source-map.d.ts` — **нужная**
-    ambient-декларация (пакет `json-source-map` без типов). Не удаляй.
-11. **`data_fiels`** — старая опечатка в имени поля, уже исправлена в БД
+9. `src/pages/characters/types/json-source-map.d.ts` — **нужная**
+   ambient-декларация (пакет `json-source-map` без типов). Не удаляй.
+10. **`data_fiels`** — старая опечатка в имени поля, уже исправлена в БД
     (`data_fields`) и в коде. Если встретишь `data_fiels` — это баг, а не схема.
 
 ## Конвенции

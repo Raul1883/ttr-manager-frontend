@@ -1,12 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/SystemSchemaRead",
+  "$ref": "#/definitions/ListSchemaRead",
   "definitions": {
-    "SystemSchemaRead": {
+    "ListSchemaRead": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "string"
         },
         "name": {
           "type": "string"
@@ -15,7 +15,7 @@
           "$ref": "#/definitions/CharacterSchema"
         }
       },
-      "required": ["id", "name", "schema"],
+      "required": ["name", "schema"],
       "additionalProperties": false
     },
     "CharacterSchema": {
@@ -30,99 +30,54 @@
         "layout": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "i": {
-                "type": "string",
-                "description": "Unique identifier for this item"
-              },
-              "x": {
-                "type": "number",
-                "description": "X position in grid units (0-indexed from left)"
-              },
-              "y": {
-                "type": "number",
-                "description": "Y position in grid units (0-indexed from top)"
-              },
-              "w": {
-                "type": "number",
-                "description": "Width in grid units"
-              },
-              "h": {
-                "type": "number",
-                "description": "Height in grid units"
-              },
-              "minW": {
-                "type": "number",
-                "description": "Minimum width in grid units"
-              },
-              "minH": {
-                "type": "number",
-                "description": "Minimum height in grid units"
-              },
-              "maxW": {
-                "type": "number",
-                "description": "Maximum width in grid units"
-              },
-              "maxH": {
-                "type": "number",
-                "description": "Maximum height in grid units"
-              },
-              "static": {
-                "type": "boolean",
-                "description": "If true, item cannot be dragged or resized, and other items will move around it during compaction."
-              },
-              "isDraggable": {
-                "type": "boolean",
-                "description": "If false, item cannot be dragged (but may still be resizable). Overrides grid-level isDraggable for this item."
-              },
-              "isResizable": {
-                "type": "boolean",
-                "description": "If false, item cannot be resized (but may still be draggable). Overrides grid-level isResizable for this item."
-              },
-              "resizeHandles": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "enum": ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
-                  "description": "Axis identifiers for resize handles.\n- Cardinal: 'n', 's', 'e', 'w' (north, south, east, west)\n- Diagonal: 'ne', 'nw', 'se', 'sw'"
-                },
-                "description": "Which resize handles to show for this item. Overrides grid-level resizeHandles for this item."
-              },
-              "isBounded": {
-                "type": "boolean",
-                "description": "If true, item is constrained to the grid container bounds. Overrides grid-level isBounded for this item."
-              },
-              "moved": {
-                "type": "boolean",
-                "description": "Internal flag set during drag/resize operations to indicate the item has moved from its original position."
-              },
-              "constraints": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string",
-                      "description": "Constraint identifier for debugging"
-                    }
-                  },
-                  "required": ["name"],
-                  "additionalProperties": false,
-                  "description": "Interface for layout constraints.\n\nImplement this interface to create custom position/size constraints. Built-in constraints: gridBounds, minMaxSize, containerBounds, boundedX, boundedY."
-                },
-                "description": "Per-item layout constraints. Applied in addition to grid-level constraints."
-              }
-            },
-            "required": ["i", "x", "y", "w", "h"],
-            "additionalProperties": false,
-            "description": "A single item in the grid layout.\n\nPosition (x, y) is in grid units, not pixels. Size (w, h) is in grid units."
-          },
-          "description": "A layout is a readonly array of layout items. Layouts should be treated as immutable."
+            "$ref": "#/definitions/LayoutItem"
+          }
         }
       },
       "required": ["sections"],
       "additionalProperties": false
+    },
+    "LayoutItem": {
+      "type": "object",
+      "properties": {
+        "i": {
+          "type": "string",
+          "description": "Идентификатор элемента сетки (обычно совпадает с заголовком секции)"
+        },
+        "x": {
+          "type": "number",
+          "description": "Позиция по X в единицах сетки"
+        },
+        "y": {
+          "type": "number",
+          "description": "Позиция по Y в единицах сетки"
+        },
+        "w": {
+          "type": "number",
+          "description": "Ширина в единицах сетки"
+        },
+        "h": {
+          "type": "number",
+          "description": "Высота в единицах сетки"
+        },
+        "minW": {
+          "type": "number"
+        },
+        "minH": {
+          "type": "number"
+        },
+        "maxW": {
+          "type": "number"
+        },
+        "maxH": {
+          "type": "number"
+        },
+        "static": {
+          "type": "boolean"
+        }
+      },
+      "required": ["i", "x", "y", "w", "h"],
+      "additionalProperties": true
     },
     "Section": {
       "type": "object",
@@ -171,30 +126,30 @@
           "$ref": "#/definitions/MinMaxField"
         },
         {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "header"
-            },
-            "key": {
-              "type": "string"
-            },
-            "label": {
-              "type": "string"
-            },
-            "ui": {
-              "type": "string",
-              "enum": ["row", "column", "compact"]
-            },
-            "array_col": {
-              "type": "number"
-            }
-          },
-          "required": ["label", "type"]
+          "$ref": "#/definitions/HeaderField"
         }
       ]
+    },
+    "HeaderField": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "header"
+        },
+        "label": {
+          "type": "string"
+        },
+        "ui": {
+          "type": "string",
+          "enum": ["row", "column", "compact"]
+        },
+        "array_col": {
+          "type": "number"
+        }
+      },
+      "required": ["label", "type"]
     },
     "NumberField": {
       "type": "object",
@@ -206,9 +161,6 @@
         },
         "defaultValue": {
           "type": "number"
-        },
-        "key": {
-          "type": "string"
         },
         "label": {
           "type": "string"
@@ -234,9 +186,6 @@
         "defaultValue": {
           "type": "string"
         },
-        "key": {
-          "type": "string"
-        },
         "label": {
           "type": "string"
         },
@@ -259,9 +208,6 @@
           "const": "textarea"
         },
         "defaultValue": {
-          "type": "string"
-        },
-        "key": {
           "type": "string"
         },
         "label": {
@@ -294,9 +240,6 @@
         "defaultValue": {
           "type": "string"
         },
-        "key": {
-          "type": "string"
-        },
         "label": {
           "type": "string"
         },
@@ -320,9 +263,6 @@
         },
         "defaultValue": {
           "type": "boolean"
-        },
-        "key": {
-          "type": "string"
         },
         "label": {
           "type": "string"
@@ -355,9 +295,6 @@
           "type": "array",
           "items": {}
         },
-        "key": {
-          "type": "string"
-        },
         "label": {
           "type": "string"
         },
@@ -381,9 +318,6 @@
         },
         "defaultValue": {
           "type": "number"
-        },
-        "key": {
-          "type": "string"
         },
         "label": {
           "type": "string"

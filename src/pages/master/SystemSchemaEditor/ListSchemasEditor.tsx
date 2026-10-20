@@ -230,7 +230,7 @@ const getDublicateKeys = (
     section.fields.forEach((field: Field, fieldIndex: number) => {
       const fieldEntry = {
         key: field.label,
-        path: `/schema/sections/${sectionIndex}/fields/${fieldIndex}/key`,
+        path: `/schema/sections/${sectionIndex}/fields/${fieldIndex}/label`,
       };
 
       const existing = globalFields.get(field.label) || [];
@@ -248,7 +248,7 @@ const getDublicateKeys = (
           (arrField: Field, arrFieldIndex: number) => {
             const arrEntry = {
               key: arrField.label,
-              path: `/schema/sections/${sectionIndex}/fields/${fieldIndex}/itemSchema/${arrFieldIndex}/key`,
+              path: `/schema/sections/${sectionIndex}/fields/${fieldIndex}/itemSchema/${arrFieldIndex}/label`,
             };
 
             const existingArr = arrayScoped.get(arrField.label) || [];
@@ -268,7 +268,7 @@ const getDublicateKeys = (
                 from: pointer?.value?.pos ?? 0,
                 to: pointer?.valueEnd?.pos ?? 0,
                 severity: "error",
-                message: `Duplicate array field key: ${key}`,
+                message: `Повторяющийся label поля внутри массива: ${key}`,
               });
             });
           }
@@ -288,7 +288,7 @@ const getDublicateKeys = (
           from: pointer?.value?.pos ?? 0,
           to: pointer?.valueEnd?.pos ?? 0,
           severity: "error",
-          message: `Duplicate field key: ${key}`,
+          message: `Повторяющийся label поля: ${key}`,
         });
       });
     }
@@ -305,7 +305,7 @@ const getDublicateKeys = (
           from: pointer?.value?.pos ?? 0,
           to: pointer?.valueEnd?.pos ?? 0,
           severity: "error",
-          message: `Duplicate section title: ${key}`,
+          message: `Повторяющийся заголовок секции: ${key}`,
         });
       });
     }

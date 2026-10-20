@@ -56,7 +56,6 @@ export default () => {
 
           <div className="bg-gray-100 rounded-md p-3 font-mono text-xs overflow-x-auto">
             {`{
-  "key": "name",
   "label": "Имя",
   "type": "text"
 }`}
@@ -64,11 +63,8 @@ export default () => {
 
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div>
-              <span className="font-medium">key</span> — уникальный ID
-            </div>
-
-            <div>
-              <span className="font-medium">label</span> — подпись
+              <span className="font-medium">label</span> — подпись и
+              уникальный идентификатор поля
             </div>
 
             <div>
@@ -78,6 +74,10 @@ export default () => {
             <div>
               <span className="font-medium">defaultValue</span> — значение по
               умолчанию
+            </div>
+
+            <div>
+              <span className="font-medium">ui</span> — как отображать поле
             </div>
           </div>
         </section>
@@ -92,8 +92,7 @@ export default () => {
               description="Короткий текст"
               example='{
             "type": "text",
-            "key": "name",
-            "label": "Имя",
+            "label": "Имя"
           },'
             />
 
@@ -102,8 +101,7 @@ export default () => {
               description="Большой текст"
               example='{
             "type": "textarea",
-            "label": "",
-            "key": "notes"
+            "label": "Заметки"
           }
           ,'
             />
@@ -112,7 +110,6 @@ export default () => {
               title="number"
               description="Число"
               example='{"type": "number",
-                "key": "protection",
                 "label": "ПБ"}'
             />
 
@@ -120,7 +117,6 @@ export default () => {
               title="minmax"
               description="Текущее / максимум"
               example='{"type": "minmax",
-                "key": "health",
                 "label": "Здоровье"}'
             />
 
@@ -137,7 +133,6 @@ export default () => {
               description="Строка в общем потоке"
               example='{"type": "header",
             "ui": "row",
-            "key": "int_skills",
             "label": "НАВЫКИ ИНТЕЛЛЕКТА"}'
             />
 
@@ -147,13 +142,11 @@ export default () => {
               example='
                       {
             "type": "array",
-            "key": "inventory",
-            "label": "",
+            "label": "Инвентарь",
             "itemSchema": [
               {
                 "array_col": 8,
                 "type": "text",
-                "key": "name",
                 "label": "Название"
               }              
             ]
