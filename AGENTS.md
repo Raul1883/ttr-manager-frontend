@@ -33,11 +33,19 @@
 | `npm run build`   | `tsc -b && vite build` — прод-сборка                                                                         |
 | `npx tsc -b`      | **главная проверка**: типы, must pass перед сдачей                                                           |
 | `npm run lint`    | ESLint. ⚠️ ~100 предсуществующих ошибок (см. «Ловушки») — это базовая линия, не регрессия. Не добавляй новых |
+| `npm run test`    | vitest — юнит-тесты, один прогон; `npm run test:watch` — watch-режим при написании                           |
 | `npm run preview` | локальный просмотр собранного `dist/`                                                                        |
 | `npm run push`    | docker build + push образа `raul319/ttr-manager-client:<version>`                                            |
 
-Тестов в проекте **нет** (vitest в планах — при появлении, писать юнит-тесты на
-чистую логику и утилиты).
+**Тесты (vitest)**: тестируем чистую логику и утилиты (AGENTS.md-конвенция) —
+компоненты и UI не покрываем. Конфиг — блок `test` в `vite.config.ts`
+(`environment: "node"`, `include: ["src/**/*.test.ts"]`), отдельного
+`vitest.config.ts` нет. Файлы тестов лежат рядом с кодом
+(`<имя>.test.ts`), типизируются через `tsconfig.app.json` (входят в `src`, а
+значит `tsc -b` проверяет и их). Импорт — явный
+(`import { describe, it, expect } from "vitest"`), глобали не используются.
+Примеры-образцы: `src/utils/remarkWikiLinks.test.ts`,
+`src/pages/tools/wiki/treeBuilder.test.ts`.
 
 ## Окружение
 
