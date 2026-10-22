@@ -3,13 +3,21 @@ import { Card, Button, Modal, Flex, Typography, Popover } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ProductItems } from "./ProductItems";
-import type { BuildingData } from "./types";
+import type { BuildingData, Product } from "./types";
 
 const { Text } = Typography;
 
 const levelToBills = [1, 3, 5, 7, 9];
 
-export default ({ data }: { data: BuildingData }) => {
+interface BuildingCardProps {
+  data: BuildingData;
+  onProductsSaved?: (products: Product[]) => void;
+}
+
+export default function BuildingCard({
+  data,
+  onProductsSaved,
+}: BuildingCardProps) {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState<boolean>(false);
   const [isProductsModalOpen, setIsProductsModalOpen] =
     useState<boolean>(false);
@@ -91,8 +99,8 @@ export default ({ data }: { data: BuildingData }) => {
         width="50%"
         centered
       >
-        <ProductItems data={data} />
+        <ProductItems data={data} onProductsSaved={onProductsSaved} />
       </Modal>
     </>
   );
-};
+}

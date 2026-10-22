@@ -7,14 +7,25 @@ import useSWR from "swr";
 import { pb } from "../../../../API/PocketBase";
 import { COLLECTIONS } from "../../../../API/collections";
 import GetPbConst from "../../../../API/GetPbConst";
-import type { CityRecord } from "./types";
+import type { CityRecord, Product } from "./types";
 
-
-export default () => {
-  const { data, isLoading, error } = useSWR<CityRecord[]>(
+export default function CityPage() {
+  const { data, isLoading, error, mutate } = useSWR<CityRecord[]>(
     [COLLECTIONS.guildCity],
     ([url]) => pb.collection(url).getFullList({ requestKey: null }),
   );
+
+  // Обновляем кэш SWR сразу после сохранения, чтобы карточка здания
+  // не показывала старый список до повторного запроса на сервер.
+  const handleProductsSaved = (buildingId: string, products: Product[]) => {
+    mutate(
+      (current) =>
+        current?.map((building) =>
+          building.id === buildingId ? { ...building, products } : building,
+        ),
+      { revalidate: false },
+    );
+  };
 
   const { data: billsCount } = useSWR(
     [COLLECTIONS.toolsConst, "guild_bills_count"],
@@ -59,10 +70,13 @@ export default () => {
             <BuildingCard
               key={x.id}
               data={{ img: pb.files.getURL(x, x.image), ...x }}
+              onProductsSaved={(products) =>
+                handleProductsSaved(x.id, products)
+              }
             />
           ))
         )}
       </div>
     </MainLayout>
   );
-};
+}

@@ -4,6 +4,7 @@ export interface CityRecord {
   level: number;
   description: string;
   image: string;
+  products?: Product[];
 }
 
 export interface BuildingData {
