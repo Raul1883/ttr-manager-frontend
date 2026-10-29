@@ -20,7 +20,7 @@ import { COLLECTIONS } from "../../API/collections";
 import { useAuth } from "../../contexts/AuthContext";
 import useApp from "antd/es/app/useApp";
 
-export default () => {
+export default function SessionPage() {
   const { id } = useParams<{ id: string }>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { user } = useAuth();
@@ -74,15 +74,21 @@ export default () => {
 
   return (
     <MainLayout>
-      <div className="flex flex-col items-center mt-10">
-        <Card className="w-4xl p-6" loading={isSessionLoading || !sessionData}>
+      <div className="flex flex-col items-center mt-4 md:mt-10">
+        <Card
+          className="w-full md:max-w-4xl p-0 sm:p-6"
+          loading={isSessionLoading || !sessionData}
+        >
           {sessionData && (
             <>
-              <Flex justify="space-between" align="center">
-                <Typography.Title level={2} className="mb-4">
+              <Flex justify="space-between" align="center" wrap gap="small">
+                <Typography.Title
+                  level={2}
+                  className="mb-2 md:mb-4 break-words"
+                >
                   {sessionData.title}
                 </Typography.Title>
-                <Space size="large">
+                <Space size="small" wrap>
                   <Tag>{sessionData.expand.genre.name}</Tag>
                   <Tag>{sessionData.expand.system.name}</Tag>
                   <Tag>{sessionData.expand.company.name}</Tag>
@@ -95,7 +101,7 @@ export default () => {
               </Flex>
 
               <Divider />
-              <p>
+              <p className="break-words">
                 {sessionData.description
                   ? sessionData.description
                   : "Мастер игры ещё не составил описания, но наверняка будет крайне интересно."}
@@ -103,7 +109,7 @@ export default () => {
               <Divider />
 
               {myApplication ? (
-                <Space>
+                <Space wrap>
                   <Button type="primary" onClick={() => setIsModalOpen(true)}>
                     Редактировать заявку
                   </Button>
@@ -132,4 +138,4 @@ export default () => {
       </div>
     </MainLayout>
   );
-};
+}

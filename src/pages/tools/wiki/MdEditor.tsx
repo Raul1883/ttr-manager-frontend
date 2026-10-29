@@ -38,7 +38,7 @@ const fetcher = async (id: string) => {
   }
 };
 
-export default () => {
+export default function MdEditor() {
   const { id } = useParams();
   const [isEdit, setIsEdit] = useState<boolean>(true);
   const { message } = useApp();
@@ -52,14 +52,14 @@ export default () => {
 
   if (isLoading || !id)
     return (
-      <div className="markdown-body mx-8 mt-4 max-w-[80%] w-250">
+      <div className="markdown-body mt-4 mx-auto w-full max-w-3xl">
         <Skeleton active />
       </div>
     );
 
   if (error)
     return (
-      <div className="markdown-body mx-8 mt-4 max-w-[80%] w-250">
+      <div className="markdown-body mt-4 mx-auto w-full max-w-3xl">
         <Empty />
       </div>
     );
@@ -83,8 +83,9 @@ export default () => {
 
   return (
     <WikiLayout>
-      <div className="ml-4 mt-4 mx-8 mr-20">
-        <Typography.Title>Редактор</Typography.Title>
+      {/* pb на мобильных — чтобы плавающие кнопки не перекрывали низ формы */}
+      <div className="mt-4 mx-auto w-full max-w-4xl pb-28 md:pb-0">
+        <Typography.Title level={3}>Редактор</Typography.Title>
         {isEdit ? (
           <Form
             initialValues={data}
@@ -133,4 +134,4 @@ export default () => {
       </FloatButton.Group>
     </WikiLayout>
   );
-};
+}

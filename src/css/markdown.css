@@ -287,3 +287,41 @@ p:after {
   scrollbar-width: thin; /* "auto", "thin", "none" */
   scrollbar-color: #c1c1c1 #f1f1f1; /* thumb и track */
 }
+
+/* Длинные ссылки и слова не должны растягивать страницу по горизонтали */
+.markdown-body {
+  overflow-wrap: break-word;
+}
+
+/* На телефоне уменьшаем заголовки и отступы, иначе контент вылезает за экран */
+@media (max-width: 767px) {
+  .markdown-body {
+    --md-font-size: 15px;
+  }
+
+  .markdown-body h1 {
+    font-size: 1.5em;
+  }
+
+  .markdown-body h2 {
+    font-size: 1.3em;
+  }
+
+  .markdown-body h3 {
+    font-size: 1.15em;
+  }
+
+  .markdown-body ul,
+  .markdown-body ol {
+    padding-left: 1.25em;
+  }
+
+  .blockquote,
+  .callout-content {
+    padding: 8px 12px;
+  }
+
+  .callout-title {
+    padding: 8px;
+  }
+}

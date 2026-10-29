@@ -23,7 +23,7 @@ const fetcher = async (id: string) => {
   }
 };
 
-export default () => {
+export default function MdViewer() {
   const { id } = useParams();
 
   const { data, error, isLoading } = useSWR<WikiRecord>(
@@ -33,7 +33,7 @@ export default () => {
 
   if (isLoading || error)
     return (
-      <div className="markdown-body mx-8 mt-4 max-w-[80%] w-250">
+      <div className="markdown-body mt-4 mx-auto w-full max-w-3xl">
         <Skeleton active />
       </div>
     );
@@ -42,8 +42,8 @@ export default () => {
     return <Empty description="Пусто!" className="pt-10" />;
 
   return (
-    <div className="mx-8 mt-4 max-w-[80%] w-250">
-      <div className="flex justify-between  flex-row">
+    <div className="mt-4 mx-auto w-full max-w-3xl">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <div></div>
         <Space align="center">
           <Tag>{data?.slug}</Tag>
@@ -56,4 +56,4 @@ export default () => {
       <MdLayout content={data?.content || "Документ пуст"} />
     </div>
   );
-};
+}

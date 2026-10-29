@@ -4,11 +4,11 @@ import MainLayout from "../components/MainLayout";
 
 const { Paragraph } = Typography;
 
-export default () => {
+export default function MainPage() {
   return (
     <MainLayout>
       <Flex vertical align="center">
-        <h1 className="text-7xl font-extrabold  bg-clip-text  pt-20 mb-6">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-center bg-clip-text pt-6 sm:pt-12 md:pt-20 mb-4 md:mb-6">
           Привет!
         </h1>
 
@@ -37,10 +37,10 @@ export default () => {
           </Typography>
         </Card>
 
-        <div className="w-full mt-10">
+        <div className="w-full mt-6 md:mt-10">
           <SessionsList master={false} />
         </div>
       </Flex>
     </MainLayout>
   );
-};
+}

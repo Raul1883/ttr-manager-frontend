@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button, Layout, Menu, Drawer, Grid } from "antd";
+import type { MenuProps } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { AuthButton } from "./AuthButton";
 import { useAuth } from "../contexts/AuthContext";
 import { ROLES } from "../types/Role";
+import type { Role } from "../types/Role";
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
@@ -16,10 +18,16 @@ interface LayoutProps {
   fluid?: boolean;
 }
 
-const getHeaderItems = () => {
-  const { user, role: userRole } = useAuth();
+type HeaderItems = NonNullable<MenuProps["items"]>;
 
-  if (!user) {
+// Пункты меню строим обычной функцией, а не хуком внутри неё: useAuth
+// вызывается в самом компоненте и передаётся сюда аргументами (иначе
+// нарушаются rules-of-hooks).
+const getHeaderItems = (
+  isAuthorized: boolean,
+  userRole: Role | null,
+): HeaderItems => {
+  if (!isAuthorized) {
     return [
       { key: "sessions", label: <Link to="/sessions">Игры</Link> },
       { key: "characters", label: <Link to="/login">Персонажи</Link> },
@@ -73,14 +81,26 @@ const AppLayout = ({
   footer = true,
   fluid = false,
 }: LayoutProps) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Храним путь, на котором открыли меню: при переходе на другой адрес
+  // drawerOpen сам становится false, без setState внутри эффекта.
+  const [drawerPath, setDrawerPath] = useState<string | null>(null);
   const location = useLocation();
   const screens = useBreakpoint();
+  const { user, role } = useAuth();
 
-  // Если экран меньше "md" (768px), считаем его мобильным
+  // Если экран меньше "md" (768px), считаем его мобильным. Сравниваем именно
+  // с false: на первом рендере breakpoint ещё undefined, и мобильная вёрстка
+  // не должна мигать на десктопе.
   const isMobile = screens.md === false;
 
-  const items = getHeaderItems();
+  const items = useMemo(
+    () => getHeaderItems(Boolean(user), role),
+    [user, role],
+  );
+
+  const drawerOpen = drawerPath === location.pathname;
+  const closeDrawer = () => setDrawerPath(null);
+
   const currentKey = location.pathname.split("/")[1] || "sessions";
 
   return (
@@ -88,45 +108,57 @@ const AppLayout = ({
       {header && (
         <Header
           style={{
+            // На мобильных шапка прилипает к верху во всю ширину, чтобы меню
+            // всегда было под рукой при скролле длинных статей. На десктопе
+            // оставляем обычное поведение — там меню и так перед глазами.
+            position: isMobile ? "sticky" : "static",
+            top: 0,
+            zIndex: 100,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            // Уменьшаем отступы на мобильных
-            margin: isMobile ? "8px 12px 0 12px" : "16px 24px 0 24px",
-            padding: isMobile ? "0 16px" : "0 24px",
-            borderRadius: "4px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.03)",
+            margin: isMobile ? 0 : "16px 24px 0 24px",
+            padding: isMobile ? "0 8px 0 12px" : "0 24px",
+            borderRadius: isMobile ? 0 : "4px",
+            boxShadow: isMobile
+              ? "0 1px 6px rgba(0, 0, 0, 0.08)"
+              : "0 4px 12px rgba(0, 0, 0, 0.03)",
             height: "56px",
             lineHeight: "56px",
-            backgroundColor: "#fff", // Убедитесь, что фон задан, если не используется тема по умолчанию
+            backgroundColor: "#fff",
           }}
         >
-          <Button type="text" style={{ height: "auto", padding: 0 }}>
-            <Link className="text-2xl md:text-3xl font-bold" to="/">
-              TTR manager
-            </Link>
-          </Button>
+          <Link
+            to="/"
+            style={{ color: "black" }}
+            className="text-xl sm:text-2xl md:text-3xl font-bold whitespace-nowrap"
+          >
+            TTR manager
+          </Link>
 
           {isMobile ? (
             <>
               {/* Кнопка-гамбургер для мобильных */}
               <Button
                 type="text"
+                aria-label="Открыть меню"
                 icon={<MenuOutlined style={{ fontSize: "20px" }} />}
-                onClick={() => setDrawerOpen(true)}
+                onClick={() => setDrawerPath(location.pathname)}
+                style={{ width: 40, height: 40 }}
               />
               <Drawer
                 title="Меню"
                 placement="right"
-                onClose={() => setDrawerOpen(false)}
+                onClose={closeDrawer}
                 open={drawerOpen}
                 size={280}
+                styles={{ body: { padding: "8px 0" } }}
               >
                 <Menu
                   mode="inline"
                   selectedKeys={[currentKey]}
                   items={items}
-                  onClick={() => setDrawerOpen(false)} // Закрываем при клике на пункт
+                  onClick={closeDrawer} // Закрываем при клике на пункт
                   style={{ borderRight: "none" }}
                 />
               </Drawer>
@@ -154,10 +186,12 @@ const AppLayout = ({
           fluid
             ? {
                 width: "100%",
-                padding: isMobile ? "16px" : "24px",
+                // На мобильных отступы задаёт сама страница (wiki), чтобы
+                // фон статьи доходил до краёв экрана.
+                padding: isMobile ? 0 : "24px",
               }
             : {
-                padding: isMobile ? "16px" : "24px",
+                padding: isMobile ? "12px" : "24px",
                 maxWidth: "1200px",
                 width: "100%",
                 margin: "0 auto",

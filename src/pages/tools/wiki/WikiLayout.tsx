@@ -1,7 +1,8 @@
 // Компонент WikiLayout.tsx
 import React, { useState } from "react";
-import { Layout, Splitter, Grid, Drawer, FloatButton } from "antd";
+import { Layout, Splitter, Grid, Drawer, Button } from "antd";
 import { BookOutlined } from "@ant-design/icons";
+import { useLocation } from "react-router-dom";
 import { WikiSidebar } from "./WikiSidebar";
 import MainLayout from "../../../components/MainLayout";
 import "../../../css/markdown.css";
@@ -12,11 +13,17 @@ const { useBreakpoint } = Grid;
 export const WikiLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Как и в MainLayout: открытость панели привязана к пути, на котором её
+  // открыли, поэтому при переходе по статье она закрывается сама — без
+  // setState внутри эффекта.
+  const [drawerPath, setDrawerPath] = useState<string | null>(null);
   const screens = useBreakpoint();
-  
+  const location = useLocation();
+
   // Если экран меньше "md" (768px), считаем его мобильным
   const isMobile = screens.md === false;
+
+  const drawerOpen = drawerPath === location.pathname;
 
   return (
     <MainLayout fluid footer={false}>
@@ -30,29 +37,37 @@ export const WikiLayout: React.FC<{ children: React.ReactNode }> = ({
             position: "relative", // Для правильного позиционирования внутри
           }}
         >
-          <Content style={{ padding: "16px" }}>{children}</Content>
+          {/* Панель над статьёй: прилипает под шапкой, чтобы оглавление было
+              доступно в любой момент чтения (на тач-устройствах нет hover). */}
+          <div
+            className="sticky z-[99] flex items-center gap-2 border-b px-3 py-2"
+            style={{ top: 56, background: "#fcf5e4", borderColor: "#e8e8e8" }}
+          >
+            <Button
+              size="small"
+              icon={<BookOutlined />}
+              onClick={() => setDrawerPath(location.pathname)}
+            >
+              Оглавление
+            </Button>
+          </div>
 
-          {/* Плавающая кнопка для вызова оглавления */}
-          <FloatButton
-            icon={<BookOutlined />}
-            type="primary"
-            style={{ right: 24, bottom: 24 }}
-            onClick={() => setDrawerOpen(true)}
-          />
+          <Content style={{ padding: "12px" }}>{children}</Content>
 
           {/* Выезжающая панель с оглавлением */}
           <Drawer
             title="Оглавление"
             placement="left" // Выезжает слева
-            onClose={() => setDrawerOpen(false)}
+            onClose={() => setDrawerPath(null)}
             open={drawerOpen}
-            width={300}
-            styles={{ body: { padding: 0 } }} // Обнуляем паддинги, чтобы Sidebar встал ровно
+            width="min(320px, 88vw)"
+            styles={{
+              body: { padding: 0, overflowY: "auto" },
+              // На узких экранах панель занимает почти всю ширину
+              wrapper: { maxWidth: "100vw" },
+            }}
           >
-            {/* Оборачиваем Sidebar в div с кликом, чтобы он закрывался при выборе статьи (опционально) */}
-            <div >
-              <WikiSidebar />
-            </div>
+            <WikiSidebar />
           </Drawer>
         </div>
       ) : (
@@ -64,7 +79,9 @@ export const WikiLayout: React.FC<{ children: React.ReactNode }> = ({
             minHeight: "calc(100vh - 56px)",
           }}
         >
-          <Splitter.Panel defaultSize="20%" min="200px">
+          {/* Фиксированная ширина: процентный defaultSize на узких десктопах
+              (768–1000px) давал слишком тонкую колонку с деревом */}
+          <Splitter.Panel defaultSize={240} min={200}>
             <WikiSidebar />
           </Splitter.Panel>
           <Splitter.Panel>

@@ -16,7 +16,7 @@ type PreviewProps = {
   handleDelete?: (id: string) => void;
 };
 
-export default (props: PreviewProps) => {
+export default function SessionPreview(props: PreviewProps) {
   let data: ApplicationPayload[] = [];
   const { user } = useAuth();
 
@@ -86,15 +86,13 @@ export default (props: PreviewProps) => {
 
   return (
     <Card
-      style={{
-        maxWidth: 320,
-        marginBottom: 16,
-      }}
+      className="w-full"
       actions={props.master ? masterButtons : userButtons}
       extra={
         <Popover
           content={popoverContent}
-          trigger="hover"
+          // На тач-устройствах hover нет, поэтому открываем и по тапу
+          trigger={["hover", "click"]}
           placement="bottomLeft"
         >
           <Badge count={number} color={myApplication ? "#71bc78" : "gray"}>
@@ -109,7 +107,7 @@ export default (props: PreviewProps) => {
       }
     >
       {props.session.description ? (
-        <Typography.Text>
+        <Typography.Text className="break-words">
           {props.session.description.substring(0, 100)}...
         </Typography.Text>
       ) : null}
@@ -120,4 +118,4 @@ export default (props: PreviewProps) => {
       </Space>
     </Card>
   );
-};
+}

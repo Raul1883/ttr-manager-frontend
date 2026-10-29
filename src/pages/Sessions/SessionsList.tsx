@@ -1,11 +1,11 @@
 import useSWR from "swr";
 import type { SessionGet } from "../../types/Session";
 import SessionPreview from "./SessionPreview";
-import { Empty, Flex, Spin } from "antd";
+import { Empty, Spin } from "antd";
 import { pb } from "../../API/PocketBase";
 import { COLLECTIONS } from "../../API/collections";
 
-export default ({ master = false }: { master: boolean }) => {
+export default function SessionsList({ master = false }: { master: boolean }) {
   const {
     data: sessionsData,
     error: sessionsError,
@@ -31,7 +31,9 @@ export default ({ master = false }: { master: boolean }) => {
     return <Empty description="Нет данных" />;
 
   return (
-    <Flex wrap gap="large" justify="space-between">
+    // Сетка вместо Flex: на телефоне карточки идут в один столбец во всю
+    // ширину, на планшете — в два, на широком экране — в три.
+    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {sessionsData?.map((session) => (
         <SessionPreview
           key={session.id}
@@ -40,6 +42,6 @@ export default ({ master = false }: { master: boolean }) => {
           handleDelete={handleDelete}
         />
       ))}
-    </Flex>
+    </div>
   );
-};
+}

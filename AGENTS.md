@@ -106,9 +106,9 @@ Git-коммиты — короткие англоязычные (см. `git log
 
 ⚠️ **Меню дублируется**: при добавлении страницы правь и маршрут в `App.tsx`,
 и пункт в `MainLayout.tsx` → `getHeaderItems()` (там три ветки: гость, master,
-player). `getHeaderItems` вызывает `useAuth()` вне компонента — известное
-нарушение rules-of-hooks (предсуществующая ошибка линта); **не копируй этот
-паттерн** в новом коде.
+player). `getHeaderItems` — обычная функция: `useAuth()` вызывается в самом
+компоненте, а в функцию передаются `isAuthorized` и `role`. Не вызывай хуки
+внутри неё.
 
 ## Доступ к данным
 
@@ -217,8 +217,8 @@ await pb.collection(COLLECTIONS.characters).update(id, body);
 2. **Path alias'ов нет** — только относительные импорты. Не добавляй алиасы
    без задачи на это.
 3. **Lint — ~100 предсуществующих ошибок** (`react-refresh/only-export-components`
-   у анонимных default-export компонентов, `no-explicit-any`, unused vars,
-   `rules-of-hooks` в MainLayout). Это базовая линия: после правок ошибок в
+   у анонимных default-export компонентов, `no-explicit-any`, unused vars).
+   Это базовая линия: после правок ошибок в
    _изменённых_ файлах быть не должно. `npx tsc -b` обязан проходить чисто.
 4. **`any` — ~37 случаев** (в основном `Record<string, any>` для data-полей).
    Не канон: в новом коде типизируй осмысленно.
@@ -249,6 +249,15 @@ await pb.collection(COLLECTIONS.characters).update(id, body);
 - **Экспорт страниц**: предпочитай именованные default-экспорты (`export
 default function FooPage()`), не анонимные стрелки — это убирает ошибки
   `react-refresh/only-export-components` в новом коде.
+- **Адаптивность**: мобильный — ширина `< md` (768px), определяем через antd
+  `Grid.useBreakpoint()` и строго `screens.md === false` (`undefined` на первом
+  рендере = десктоп, иначе мобильная вёрстка мигает). На мобильных навигация —
+  гамбургер + `Drawer` в `MainLayout`, оглавление wiki — липкая кнопка +
+  `Drawer` в `WikiLayout`, шапка `sticky`. Открытость drawer'ов привязывай к
+  `location.pathname` (панель закрывается при переходе), а не через `setState`
+  в `useEffect`. Списки карточек — Tailwind-сетка
+  (`grid-cols-1 sm:grid-cols-2 xl:grid-cols-3`) без фиксированных ширин;
+  проверяй отсутствие горизонтального скролла на 360px.
 - **Типы**: доменные — в `src/types/`, локальные — рядом с компонентом.
   Зеркализуй структуру PB-коллекций (Preview/Read/Post), если пишешь новые.
 

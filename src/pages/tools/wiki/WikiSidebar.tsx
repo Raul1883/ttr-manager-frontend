@@ -117,7 +117,7 @@ export const WikiSidebar: React.FC = () => {
   // --- Рендер ---
   if (isLoading) {
     return (
-      <aside className="overflow-y-auto pt-8">
+      <aside className="h-full overflow-auto pt-4 md:pt-8">
         <Typography.Title level={4} className="ml-4">
           <Spin />
           {"  TTR wiki"}
@@ -144,7 +144,7 @@ export const WikiSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="overflow-y-auto pt-8">
+    <aside className="h-full overflow-auto pt-4 md:pt-8">
       <Space>
         <Typography.Title level={4} className="ml-4">
           TTR wiki

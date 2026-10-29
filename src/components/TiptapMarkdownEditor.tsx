@@ -12,7 +12,7 @@ import {
 } from "@ant-design/icons";
 
 // Tiptap
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import { Table } from "@tiptap/extension-table";
@@ -20,6 +20,12 @@ import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import { useEffect } from "react";
+
+// tiptap-markdown кладёт API в editor.storage, но не типизирует его
+const getMarkdown = (editor: Editor) =>
+  (
+    editor.storage as unknown as { markdown: { getMarkdown: () => string } }
+  ).markdown.getMarkdown();
 
 // --- 1. КОМПОНЕНТ РЕДАКТОРА ---
 export const TiptapMarkdownEditor = ({
@@ -43,14 +49,13 @@ export const TiptapMarkdownEditor = ({
     ],
     content: value,
     onUpdate: ({ editor }) => {
-      const markdown = (editor.storage as any).markdown.getMarkdown();
-      onChange?.(markdown);
+      onChange?.(getMarkdown(editor));
     },
   });
 
   useEffect(() => {
     if (editor && value) {
-      const currentMarkdown = (editor.storage as any).markdown.getMarkdown();
+      const currentMarkdown = getMarkdown(editor);
       if (value !== currentMarkdown) {
         editor.commands.setContent(value);
       }
@@ -60,7 +65,7 @@ export const TiptapMarkdownEditor = ({
   if (!editor) return null;
 
   return (
-    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white max-w-full">
       {/* Панель инструментов */}
       <div className="bg-gray-50 border-b border-gray-200 p-2">
         <Space wrap>
@@ -137,7 +142,7 @@ export const TiptapMarkdownEditor = ({
 
           {/* Управление таблицей (показываем только если курсор внутри таблицы) */}
           {editor.isActive("table") && (
-            <Space.Compact>
+            <Space.Compact className="max-w-full overflow-x-auto">
               <Button
                 onClick={() => editor.chain().focus().addColumnAfter().run()}
               >
