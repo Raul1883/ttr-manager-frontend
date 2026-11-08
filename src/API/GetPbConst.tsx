@@ -4,6 +4,8 @@ interface ToolsConst {
   name: string;
   string_value: string;
   number_value: number;
+  /** JSON-значение константы; формат зависит от `name`. */
+  json_value?: unknown;
 }
 
 export default async (urlName: string[]) => {

@@ -1,26 +1,33 @@
 import {
   PROBABILITY_MATRIX,
-  DURABILITY_MAP,
-  disadvantages,
+  QUALITY_META,
   advantages,
+  disadvantages,
 } from "./const";
-import type { GenFormData, Properies } from "./types";
+import type {
+  ForgeLevel,
+  GenFormData,
+  QualityTier,
+  WeaponResult,
+} from "./types";
 
-/** Выбор элемента с заданными весами (аналог random.choices) */
-function weightedRandom<T>(items: T[], weights: number[]): T {
-  const total = weights.reduce((acc, w) => acc + w, 0);
+/** Выбор элемента с заданными весами (аналог random.choices). */
+function weightedRandom<T>(
+  items: readonly T[],
+  weightOf: (item: T) => number,
+): T {
+  const total = items.reduce((acc, item) => acc + weightOf(item), 0);
   let rand = Math.random() * total;
-  for (let i = 0; i < items.length; i++) {
-    rand -= weights[i];
-    if (rand <= 0) {
-      return items[i];
-    }
+  for (const item of items) {
+    rand -= weightOf(item);
+    if (rand <= 0) return item;
   }
+  // Страховка от погрешности округления: последний элемент всегда валиден.
   return items[items.length - 1];
 }
 
-/** Перемешивание массива (Fisher–Yates) для выборки без повторений */
-function shuffle<T>(array: T[]): T[] {
+/** Перемешивание массива (Fisher–Yates) для выборки без повторений. */
+function shuffle<T>(array: readonly T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -29,38 +36,35 @@ function shuffle<T>(array: T[]): T[] {
   return arr;
 }
 
-/** Взять N случайных уникальных элементов из массива */
-function sampleN<T>(array: T[], n: number): T[] {
+/** Взять N случайных уникальных элементов из массива. */
+function sampleN<T>(array: readonly T[], n: number): T[] {
   if (n <= 0) return [];
-  const shuffled = shuffle(array);
-  return shuffled.slice(0, Math.min(n, shuffled.length));
+  return shuffle(array).slice(0, Math.min(n, array.length));
 }
 
-export const generateWeapon = ({ lvl, name }: GenFormData) => {
-  const options = PROBABILITY_MATRIX[lvl];
-  const qualities = Object.keys(options);
-  const weights = Object.values(options);
+function pickQuality(lvl: ForgeLevel): QualityTier {
+  const weights = PROBABILITY_MATRIX[lvl];
+  const qualities = Object.keys(weights) as QualityTier[];
+  return weightedRandom(qualities, (quality) => weights[quality] ?? 0);
+}
 
-  const chosenQuality = weightedRandom(qualities, weights);
-  const durability = DURABILITY_MAP[chosenQuality];
+export function generateWeapon({
+  lvl,
+  name,
+  blueprint,
+}: GenFormData): WeaponResult {
+  const quality = pickQuality(lvl);
+  const meta = QUALITY_META[quality];
 
-  let properties: Properies[] = [];
-
-  if (chosenQuality.includes("2 недостатка")) {
-    properties = sampleN(disadvantages, 2);
-  } else if (chosenQuality.includes("1 недостаток")) {
-    properties = sampleN(disadvantages, 1);
-  } else if (chosenQuality.includes("2 преимущества")) {
-    properties = sampleN(advantages, 2);
-  } else if (chosenQuality.includes("1 преимущество")) {
-    properties = sampleN(advantages, 1);
-  }
-  // "Среднее" – остаётся пустым
+  const rule = meta.properties;
+  const pool = rule?.pool === "advantages" ? advantages : disadvantages;
+  const properties = rule ? sampleN(pool, rule.count) : [];
 
   return {
-    quality: chosenQuality,
-    durability,
+    quality,
+    durability: meta.durability,
     properties,
-    name,
+    name: name.trim(),
+    blueprint,
   };
-};
+}

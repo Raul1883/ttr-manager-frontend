@@ -1,4 +1,6 @@
-export const advantages = [
+import type { ForgeLevel, QualityTier, WeaponProperty } from "./types";
+
+export const advantages: WeaponProperty[] = [
   {
     title: "Прочный",
     description: "Хиты этого предмета увеличиваются в три раза.",
@@ -60,7 +62,7 @@ export const advantages = [
   },
 ];
 
-export const disadvantages = [
+export const disadvantages: WeaponProperty[] = [
   {
     title: "Плохая/Некачественная/Ужасная Ручная работа",
     description:
@@ -102,7 +104,10 @@ export const disadvantages = [
   },
 ];
 
-export const PROBABILITY_MATRIX: Record<number, Record<string, number>> = {
+export const PROBABILITY_MATRIX: Record<
+  ForgeLevel,
+  Partial<Record<QualityTier, number>>
+> = {
   0: {
     "Низкое (2 недостатка)": 90,
     "Ниже среднего (1 недостаток)": 10,
@@ -138,12 +143,93 @@ export const PROBABILITY_MATRIX: Record<number, Record<string, number>> = {
   },
 };
 
-export const DURABILITY_MAP: Record<string, number> = {
-  "Низкое (2 недостатка)": 2,
-  "Ниже среднего (1 недостаток)": 2,
-  "Среднее (без свойств)": 3,
-  "Хорошее (1 преимущество)": 4,
-  "Отличное (Качество +1, 1 преимущество)": 4,
-  "Превосходное (+1, 2 преимущества)": 5,
-  "Легендарное (+2, 2 преимущества)": 5,
+/** Правило выдачи свойств: сколько штук и из какой таблицы брать. */
+interface PropertiesRule {
+  pool: "advantages" | "disadvantages";
+  count: number;
+}
+
+interface QualityMeta {
+  /** Хиты (прочность) предмета этого качества. */
+  durability: number;
+  /** Целевой процент шкалы качества — используется анимацией ковки. */
+  progress: number;
+  /** `null` — качество без свойств. */
+  properties: PropertiesRule | null;
+}
+
+/**
+ * Единый источник правды по качествам: прочность, свойства и шкала прогресса
+ * раньше были размазаны по трём местам и сопоставлялись по подстрокам названия.
+ */
+export const QUALITY_META: Record<QualityTier, QualityMeta> = {
+  "Низкое (2 недостатка)": {
+    durability: 2,
+    progress: 15,
+    properties: { pool: "disadvantages", count: 2 },
+  },
+  "Ниже среднего (1 недостаток)": {
+    durability: 2,
+    progress: 25,
+    properties: { pool: "disadvantages", count: 1 },
+  },
+  "Среднее (без свойств)": {
+    durability: 3,
+    progress: 45,
+    properties: null,
+  },
+  "Хорошее (1 преимущество)": {
+    durability: 4,
+    progress: 60,
+    properties: { pool: "advantages", count: 1 },
+  },
+  "Отличное (Качество +1, 1 преимущество)": {
+    durability: 4,
+    progress: 75,
+    properties: { pool: "advantages", count: 1 },
+  },
+  "Превосходное (+1, 2 преимущества)": {
+    durability: 5,
+    progress: 90,
+    properties: { pool: "advantages", count: 2 },
+  },
+  "Легендарное (+2, 2 преимущества)": {
+    durability: 5,
+    progress: 100,
+    properties: { pool: "advantages", count: 2 },
+  },
 };
+
+export const FORGE_LEVELS: readonly { value: ForgeLevel; label: string }[] = [
+  { value: 0, label: "0. Новичок" },
+  { value: 1, label: "1. Подмастерье" },
+  { value: 2, label: "2. Сельский кузнец" },
+  { value: 3, label: "3. Опытный кузнец" },
+  { value: 4, label: "4. Профильный мастер" },
+  { value: 5, label: "5. Высший мастер" },
+];
+
+/** Значение `<select>` приходит строкой — приводим к известному уровню. */
+export function toForgeLevel(raw: string): ForgeLevel {
+  const parsed = Number(raw);
+  return FORGE_LEVELS.some((level) => level.value === parsed)
+    ? (parsed as ForgeLevel)
+    : 0;
+}
+
+/** Тайминги анимации ковки (мс), вынесены из компонента. */
+export const FORGE_TIMELINE = {
+  /** Импульс от карточек до шкалы прогресса. */
+  strikeTravel: 600,
+  /** Задержка первого удара после начала ковки. */
+  firstStrikeDelay: 300,
+  /** Интервал между ударами молота. */
+  strikeInterval: 600,
+  /** Пауза после последнего удара до показа результата. */
+  resultDelay: 700,
+  /** Сколько экран результата висит до возврата в `idle`. */
+  idleDelay: 600,
+} as const;
+
+/** Количество ударов молота за одну ковку. */
+export const FORGE_STRIKES = 3;

@@ -1,0 +1,861 @@
+/*
+ * Стили кузни. Antd здесь не используется намеренно: анимации ударов
+ * и «конвейер» результатов требуют ручного контроля над transform/opacity.
+ * Переменные живут на контейнере страницы, а не на :root, чтобы не течь
+ * в глобальную область. Пикер рендерится порталом в body, поэтому переменные
+ * продублированы и на его подложке.
+ */
+.forge-container,
+.forge-picker-backdrop {
+  --forge-bg-light: #fcf5e4;
+  --forge-bg-dark: #e4dcc8;
+  --forge-text-main: #3a332a;
+  --forge-text-muted: #756a5c;
+  --forge-accent: #a15c17; /* Цвет свечения и кнопок (бронза/медь) */
+  --forge-border: #d2c5ab;
+}
+
+.forge-container {
+  padding: 2rem 0;
+  color: var(--forge-text-main);
+  font-family: inherit;
+}
+
+/* Карточки */
+.forge-card {
+  background-color: var(--forge-bg-light);
+  padding: 1.5rem;
+  border-radius: 4px;
+  transition: all 0.4s ease-in-out;
+}
+
+/* Элементы форм */
+.forge-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.forge-label--flat {
+  margin-bottom: 0;
+}
+
+.forge-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--forge-bg-dark);
+  padding: 0.5rem 0;
+  color: var(--forge-text-main);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+
+.forge-input:focus {
+  border-color: var(--forge-accent);
+}
+
+.forge-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Кнопка */
+.forge-button {
+  width: 100%;
+  min-height: 60px;
+  background-color: var(--forge-text-main);
+  color: var(--forge-bg-light);
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.forge-button:hover:not(:disabled) {
+  background-color: var(--forge-accent);
+}
+
+.forge-button:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+.forge-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.forge-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Блок результата */
+.forge-result-card {
+  background-color: var(--forge-bg-light);
+  border: 1px solid var(--forge-bg-dark);
+  padding: 2rem;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Плейсхолдер до первой ковки: пунктирная рамка задаётся здесь, а не
+   Tailwind-утилитой — unlayered CSS перебивает @layer utilities. */
+.forge-result-card--placeholder {
+  min-height: 12.5rem;
+  border-style: dashed;
+}
+
+.forge-result-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--forge-accent);
+}
+
+.forge-tag {
+  display: inline-block;
+  background-color: var(--forge-bg-dark);
+  color: var(--forge-text-main);
+  padding: 0.25rem 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Сведения об основе, выбранной в справочнике «Чертеж» */
+.forge-blueprint {
+  margin-top: 1.25rem;
+  padding: 0.875rem 1rem;
+  border-left: 3px solid var(--forge-accent);
+  border-radius: 0 6px 6px 0;
+  background-color: var(--forge-bg-dark);
+}
+
+.forge-blueprint-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+}
+
+.forge-blueprint-source {
+  color: var(--forge-text-muted);
+  font-size: 0.8rem;
+}
+
+.forge-blueprint-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.forge-blueprint-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.forge-blueprint-stat-label {
+  color: var(--forge-text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.forge-blueprint-stat-value {
+  color: var(--forge-accent);
+  font-weight: 700;
+}
+
+.forge-blueprint-props {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.forge-prop-tag {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--forge-border);
+  border-radius: 4px;
+  background-color: var(--forge-bg-light);
+  font-size: 0.75rem;
+}
+
+.forge-blueprint-desc {
+  margin-top: 0.5rem;
+  color: var(--forge-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.forge-property-title {
+  font-weight: 600;
+  color: var(--forge-text-main);
+}
+
+.forge-copy-btn {
+  background: transparent;
+  border: none;
+  color: var(--forge-text-muted);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.forge-copy-btn:hover {
+  color: var(--forge-text-main);
+}
+
+.forge-copy-btn:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+/* Физика удара справа налево */
+@keyframes strikeLeft {
+  0% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-16px);
+  } /* Резкий выпад влево */
+  60% {
+    transform: translateX(4px);
+  } /* Отскок */
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bumpLeft {
+  0% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(-12px);
+  } /* Передача импульса */
+  70% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bumpDown {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(16px);
+  } /* Последняя бьет вниз */
+  70% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-and-spin {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  15% {
+    transform: translate(-3px, 1px);
+  }
+  30% {
+    transform: translate(3px, -2px);
+  }
+  45% {
+    transform: translate(-2px, -1px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  75% {
+    transform: translate(-1px, 1px);
+  }
+  90% {
+    transform: translate(1px, -1px);
+  }
+}
+
+/* Классы, которые вешает JS на время анимации */
+.anim-strike {
+  animation: strikeLeft 0.4s ease-out forwards;
+}
+.anim-bump-left {
+  animation: bumpLeft 0.4s ease-out forwards;
+}
+.anim-bump-down {
+  animation: bumpDown 0.4s ease-out forwards;
+}
+.anim-rotate-item {
+  animation: pulse-and-spin 2s ease-out forwards;
+}
+
+/* Бесконечный конвейер результатов */
+.slider-viewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.slider-track {
+  display: flex;
+  /* Плавный отскок при выезде новой карточки */
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slider-pane {
+  flex: 0 0 100%; /* Строго 100% ширины видимой области */
+  padding: 1rem 0;
+  box-sizing: border-box;
+  transition: opacity 0.4s ease;
+}
+
+/* Уехавшие карточки полупрозрачны для визуальной глубины */
+.slider-pane.inactive {
+  opacity: 0.3;
+  pointer-events: none; /* Чтобы нельзя было кликать по невидимым кнопкам */
+}
+
+/* Кольцо качества */
+.forge-progress-ring-wrapper {
+  position: relative;
+  width: 7rem;
+  height: 7rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.forge-progress-ring {
+  width: 100%;
+  height: 100%;
+}
+
+.forge-progress-ring-track {
+  stroke: var(--forge-border);
+}
+
+.forge-progress-ring-fill {
+  stroke: var(--forge-accent);
+  /* Хлесткое заполнение при изменении прогресса */
+  transition: stroke-dashoffset 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.forge-progress-value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--forge-text-main);
+  font-variant-numeric: tabular-nums; /* Чтобы цифры не прыгали по ширине */
+}
+
+/* Эффект отдачи при ударе молота */
+@keyframes strikeShake {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(2px) scale(0.99);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  75% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.anim-shake {
+  animation: strikeShake 0.2s ease-out;
+}
+
+/* Чертеж: картинка — кнопка открытия справочника */
+.blueprint-trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.blueprint-trigger:hover:not(:disabled) {
+  box-shadow: 0 0 0 2px var(--forge-accent);
+  transform: translateY(-1px);
+}
+
+.blueprint-trigger:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+.blueprint-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.blueprint-trigger::after {
+  content: "Выбрать";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0.25rem;
+  background: rgba(58, 51, 42, 0.72);
+  color: var(--forge-bg-light);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.blueprint-trigger:hover:not(:disabled)::after,
+.blueprint-trigger:focus-visible::after {
+  opacity: 1;
+}
+
+/* Пикер чертежей */
+.forge-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(58, 51, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: pickerFadeIn 0.2s ease-out;
+}
+
+.forge-picker-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(60rem, 100%);
+  height: 85vh;
+  overflow: hidden;
+  border: 1px solid var(--forge-border);
+  border-radius: 10px;
+  background: var(--forge-bg-light);
+  color: var(--forge-text-main);
+  box-shadow: 0 24px 60px rgba(58, 51, 42, 0.35);
+  animation: pickerPopIn 0.4s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.forge-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--forge-border);
+}
+
+.forge-picker-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.forge-picker-close {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--forge-text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.forge-picker-close:hover {
+  background: var(--forge-bg-dark);
+  color: var(--forge-text-main);
+}
+
+.forge-picker-close:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+.forge-picker-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem 0;
+  border-bottom: 1px solid var(--forge-border);
+}
+
+.forge-picker-tab {
+  margin-bottom: -1px;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--forge-text-muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.forge-picker-tab:hover {
+  color: var(--forge-text-main);
+}
+
+.forge-picker-tab.active {
+  border-bottom-color: var(--forge-accent);
+  color: var(--forge-text-main);
+}
+
+.forge-picker-tab:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+.forge-picker-body {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.forge-picker-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  overflow-y: auto;
+  border-right: 1px solid var(--forge-border);
+}
+
+.forge-picker-category {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--forge-text-main);
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.forge-picker-category:hover {
+  background: var(--forge-bg-dark);
+}
+
+.forge-picker-category.active {
+  background: var(--forge-text-main);
+  color: var(--forge-bg-light);
+}
+
+.forge-picker-category:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+.forge-picker-count {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.forge-picker-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  align-content: start;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.forge-picker-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border: 1px solid var(--forge-border);
+  border-radius: 8px;
+  background: #fffdf7;
+  color: var(--forge-text-main);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.forge-picker-item:hover {
+  border-color: var(--forge-accent);
+  box-shadow: 0 4px 14px rgba(161, 92, 23, 0.15);
+  transform: translateY(-1px);
+}
+
+.forge-picker-item:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+.forge-picker-item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.forge-picker-item-name {
+  font-weight: 700;
+}
+
+.forge-picker-item-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  justify-content: flex-end;
+}
+
+.forge-picker-item-stat {
+  color: var(--forge-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.forge-picker-item-props {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.forge-picker-prop {
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--forge-bg-dark);
+  font-size: 0.7rem;
+}
+
+.forge-picker-item-desc {
+  color: var(--forge-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.forge-picker-state {
+  grid-column: 1 / -1;
+  padding: 2rem 1.5rem;
+  color: var(--forge-text-muted);
+  text-align: center;
+}
+
+@keyframes pickerFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pickerPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 767px) {
+  .forge-picker-panel {
+    max-height: 90vh;
+  }
+
+  .forge-picker-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .forge-picker-categories {
+    flex-direction: row;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-bottom: 1px solid var(--forge-border);
+  }
+
+  .forge-picker-category {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .forge-picker-items {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Анимации — украшение: при чувствительности к движению их можно отключить,
+   логика ковки (таймеры и смена фаз) при этом не ломается. */
+@media (prefers-reduced-motion: reduce) {
+  .anim-strike,
+  .anim-bump-left,
+  .anim-bump-down,
+  .anim-shake,
+  .forge-picker-backdrop,
+  .forge-picker-panel {
+    animation: none;
+  }
+
+  .slider-track,
+  .forge-progress-ring-fill,
+  .forge-card,
+  .blueprint-trigger,
+  .forge-picker-close,
+  .forge-picker-category,
+  .forge-picker-item {
+    transition: none;
+  }
+}
+
+/* Анимация в result */
+@keyframes dropDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 2. */
+.drop-item {
+  animation: dropDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.delay-1 {
+  animation-delay: 0.1s;
+}
+.delay-2 {
+  animation-delay: 0.25s;
+}
+.delay-3 {
+  animation-delay: 0.4s;
+}
+
+
+/* Анимации появления модального окна */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Анимации исчезновения модального окна */
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to { 
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+}
+
+/* Анимация переключения вкладок */
+@keyframes tabFadeIn {
+  from { 
+    opacity: 0;
+    transform: translateX(10px); /* Небольшой слайд сбоку или снизу */
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Применяем анимации к элементам */
+.forge-picker-backdrop {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.forge-picker-panel {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Классы, которые добавляются перед закрытием */
+.forge-picker-backdrop.closing {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+.forge-picker-panel.closing {
+  animation: slideDown 0.3s ease-in forwards;
+}
+
+/* Класс для плавного переключения контента вкладок */
+.fade-in-tab {
+  animation: tabFadeIn 0.3s ease-out forwards;
+}
