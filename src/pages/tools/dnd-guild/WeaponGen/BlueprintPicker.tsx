@@ -1,12 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useWeaponCatalog } from "./useWeaponCatalog";
+import PropertiesView from "./PropertiesView";
 import type { CatalogSelection } from "./types";
 
 interface BlueprintPickerProps {
   onSelect: (selection: CatalogSelection) => void;
   onClose: () => void;
 }
+
+/** Режим пикера: выбор чертежа или справочник свойств ковки. */
+type PickerView = "catalog" | "properties";
 
 export default function BlueprintPicker({
   onSelect,
@@ -15,7 +19,8 @@ export default function BlueprintPicker({
   const { groups, isLoading, error, retry } = useWeaponCatalog();
   const [groupId, setGroupId] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  
+  const [view, setView] = useState<PickerView>("catalog");
+
   // Добавляем состояние для анимации закрытия
   const [isClosing, setIsClosing] = useState(false);
 
@@ -51,8 +56,8 @@ export default function BlueprintPicker({
   }, [handleClose]);
 
   return createPortal(
-    <div 
-      className={`forge-picker-backdrop ${isClosing ? "closing" : ""}`} 
+    <div
+      className={`forge-picker-backdrop ${isClosing ? "closing" : ""}`}
       onClick={handleClose}
     >
       <div
@@ -77,137 +82,161 @@ export default function BlueprintPicker({
           </button>
         </header>
 
-        {isLoading && <p className="forge-picker-state">Загружаем чертежи…</p>}
-
-        {!isLoading && error && (
-          <div className="forge-picker-state">
-            <p>Не удалось загрузить список чертежей.</p>
+        <div
+          className="forge-picker-tabs"
+          role="tablist"
+          aria-label="Разделы справочника"
+        >
+          {groups.map((group) => (
             <button
+              key={group.id}
               type="button"
-              className="forge-copy-btn"
-              onClick={() => void retry()}
+              role="tab"
+              aria-selected={view === "catalog" && group.id === activeGroup?.id}
+              className={`forge-picker-tab ${
+                view === "catalog" && group.id === activeGroup?.id
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() => {
+                setView("catalog");
+                if (group.id === activeGroup?.id) return;
+                setGroupId(group.id);
+                setCategoryId("");
+              }}
             >
-              Повторить
+              {group.name}
             </button>
-          </div>
-        )}
+          ))}
 
-        {!isLoading && !error && groups.length === 0 && (
-          <p className="forge-picker-state">Список чертежей пуст.</p>
-        )}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "properties"}
+            className={`forge-picker-tab forge-picker-tab--props ${
+              view === "properties" ? "active" : ""
+            }`}
+            onClick={() => setView("properties")}
+          >
+            Свойства
+          </button>
+        </div>
 
-        {!isLoading && !error && activeGroup && (
+        {view === "properties" ? (
+          <PropertiesView />
+        ) : (
           <>
-            <div
-              className="forge-picker-tabs"
-              role="tablist"
-              aria-label="Тип снаряжения"
-            >
-              {groups.map((group) => (
+            {isLoading && (
+              <p className="forge-picker-state">Загружаем чертежи…</p>
+            )}
+
+            {!isLoading && error && (
+              <div className="forge-picker-state">
+                <p>Не удалось загрузить список чертежей.</p>
                 <button
-                  key={group.id}
                   type="button"
-                  role="tab"
-                  aria-selected={group.id === activeGroup.id}
-                  className={`forge-picker-tab ${
-                    group.id === activeGroup.id ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    if (group.id === activeGroup.id) return;
-                    setGroupId(group.id);
-                    setCategoryId("");
-                  }}
+                  className="forge-copy-btn"
+                  onClick={() => void retry()}
                 >
-                  {group.name}
+                  Повторить
                 </button>
-              ))}
-            </div>
-
-            <div className="forge-picker-body">
-              <nav className="forge-picker-categories" aria-label="Категории">
-                {activeGroup.categories.map((category) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    className={`forge-picker-category ${
-                      category.id === activeCategory?.id ? "active" : ""
-                    }`}
-                    onClick={() => setCategoryId(category.id)}
-                  >
-                    <span>{category.name}</span>
-                    <span className="forge-picker-count">
-                      {category.items.length}
-                    </span>
-                  </button>
-                ))}
-              </nav>
-
-              {/* key сбрасывает прокрутку и триггерит анимацию при смене вкладки */}
-              <div className="forge-picker-items fade-in-tab" key={activeCategory?.id}>
-                {activeCategory?.items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="forge-picker-item"
-                    onClick={() =>
-                      onSelect({
-                        item,
-                        groupName: activeGroupName,
-                        categoryName: activeCategoryName,
-                      })
-                    }
-                  >
-                    <span className="forge-picker-item-head">
-                      <span className="forge-picker-item-name">
-                        {item.name}
-                      </span>
-                      <span className="forge-picker-item-stats">
-                        {item.damage && (
-                          <span className="forge-picker-item-stat">
-                            {item.damage}
-                          </span>
-                        )}
-                        {item.ac && (
-                          <span className="forge-picker-item-stat">
-                            КД {item.ac}
-                          </span>
-                        )}
-                        {item.distance && (
-                          <span className="forge-picker-item-stat">
-                            Дист. {item.distance}
-                          </span>
-                        )}
-                      </span>
-                    </span>
-
-                    {item.properties.length > 0 && (
-                      <span className="forge-picker-item-props">
-                        {item.properties.map((property, index) => (
-                          <span
-                            key={`${item.id}-${index}`}
-                            className="forge-picker-prop"
-                          >
-                            {property}
-                          </span>
-                        ))}
-                      </span>
-                    )}
-
-                    {item.description && (
-                      <span className="forge-picker-item-desc">
-                        {item.description}
-                      </span>
-                    )}
-                  </button>
-                ))}
-
-                {activeCategory && activeCategory.items.length === 0 && (
-                  <p className="forge-picker-state">
-                    В этой категории пока нет предметов.
-                  </p>
-                )}
               </div>
-            </div>
+            )}
+
+            {!isLoading && !error && groups.length === 0 && (
+              <p className="forge-picker-state">Список чертежей пуст.</p>
+            )}
+
+            {!isLoading && !error && activeGroup && (
+              <div className="forge-picker-body">
+                <nav className="forge-picker-categories" aria-label="Категории">
+                  {activeGroup.categories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      className={`forge-picker-category ${
+                        category.id === activeCategory?.id ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryId(category.id)}
+                    >
+                      <span>{category.name}</span>
+                      <span className="forge-picker-count">
+                        {category.items.length}
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+
+                {/* key сбрасывает прокрутку и триггерит анимацию при смене вкладки */}
+                <div
+                  className="forge-picker-items fade-in-tab"
+                  key={activeCategory?.id}
+                >
+                  {activeCategory?.items.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="forge-picker-item"
+                      onClick={() =>
+                        onSelect({
+                          item,
+                          groupName: activeGroupName,
+                          categoryName: activeCategoryName,
+                        })
+                      }
+                    >
+                      <span className="forge-picker-item-head">
+                        <span className="forge-picker-item-name">
+                          {item.name}
+                        </span>
+                        <span className="forge-picker-item-stats">
+                          {item.damage && (
+                            <span className="forge-picker-item-stat">
+                              {item.damage}
+                            </span>
+                          )}
+                          {item.ac && (
+                            <span className="forge-picker-item-stat">
+                              КД {item.ac}
+                            </span>
+                          )}
+                          {item.distance && (
+                            <span className="forge-picker-item-stat">
+                              Дист. {item.distance}
+                            </span>
+                          )}
+                        </span>
+                      </span>
+
+                      {item.properties.length > 0 && (
+                        <span className="forge-picker-item-props">
+                          {item.properties.map((property, index) => (
+                            <span
+                              key={`${item.id}-${index}`}
+                              className="forge-picker-prop"
+                            >
+                              {property}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+
+                      {item.description && (
+                        <span className="forge-picker-item-desc">
+                          {item.description}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+
+                  {activeCategory && activeCategory.items.length === 0 && (
+                    <p className="forge-picker-state">
+                      В этой категории пока нет предметов.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

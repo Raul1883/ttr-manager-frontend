@@ -26,6 +26,13 @@ export default function WeaponSlider({ history, onCopy }: WeaponSliderProps) {
             <p className="forge-desc text-center text-lg opacity-60">
               Выберите параметры и нажмите «Создать», чтобы создать предмет.
             </p>
+            <p className="forge-desc text-center text-lg opacity-60">
+              Уровень кузнеца влияет на качество, в блоке чертеж можно выбрать
+              уже готовый шаблон предмета.
+            </p>
+            <p className="forge-desc text-center text-lg opacity-60">
+              Чем ближе поковка к 100% – тем выше качество.
+            </p>
           </div>
         </div>
 

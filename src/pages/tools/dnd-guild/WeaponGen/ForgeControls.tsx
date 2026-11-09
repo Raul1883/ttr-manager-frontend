@@ -19,7 +19,7 @@ import firearm from "../../../../assets/weapon-gen/gunshot.svg";
 import shortPolearm from "../../../../assets/weapon-gen/short-polearm.svg";
 import longPolearm from "../../../../assets/weapon-gen/long-polearm.svg";
 
-import bar from "../../../../assets/weapon-gen/metal-bar.svg";
+import bar from "../../../../assets/weapon-gen/select.svg";
 import { Typography } from "antd";
 
 interface ForgeControlsProps {
@@ -74,7 +74,7 @@ export default function ForgeControls({
 }: ForgeControlsProps) {
   const isBusy = phase !== "idle";
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState("Короткое клинковое");
+  const [currentCategory, setCurrentCategory] = useState("");
   const levelLabel =
     FORGE_LEVELS.find((level) => level.value === lvl)?.label ?? "";
 
@@ -108,7 +108,7 @@ export default function ForgeControls({
       </div>
 
       <div
-        className={`justify-between forge-card flex flex-col ${phase === "striking" ? "anim-bump-left" : ""}`}
+        className={`blueprint-card justify-between forge-card flex flex-col ${phase === "striking" ? "anim-bump-left" : ""}`}
         style={{ animationDelay: "100ms" }}
       >
         <Typography.Title level={4}>Чертеж</Typography.Title>

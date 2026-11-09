@@ -42,8 +42,17 @@ export default function WeaponResultCard({
           <Typography.Title level={3} className="drop-item delay-1">
             {weapon.name || `Нечто #${index + 1}`}
           </Typography.Title>
+
           <div className="flex gap-4 items-center drop-item delay-1">
             <span className="forge-tag">{weapon.quality}</span>
+
+            {!blueprint && (
+              <div className="forge-blueprint-props">
+                <span className="forge-prop-tag">
+                  Прочность: {weapon.durability}
+                </span>
+              </div>
+            )}
 
             {blueprint && (
               <section
@@ -51,15 +60,9 @@ export default function WeaponResultCard({
                 aria-label="Сведения об основе"
               >
                 <div className="forge-blueprint-props">
-                  {blueprint.item.properties.map((property, propertyIndex) => (
-                    <span
-                      key={`${blueprint.item.id}-${propertyIndex}`}
-                      className="forge-prop-tag"
-                    >
-                      {property}
-                    </span>
-                  ))}
-
+                  <span className="forge-prop-tag">
+                    Прочность: {weapon.durability}
+                  </span>
                   {blueprint.item.damage && (
                     <span className="forge-prop-tag">
                       Урон: {blueprint.item.damage}
@@ -75,6 +78,14 @@ export default function WeaponResultCard({
                       Дистанция: {blueprint.item.distance}
                     </span>
                   )}
+                  {blueprint.item.properties.map((property, propertyIndex) => (
+                    <span
+                      key={`${blueprint.item.id}-${propertyIndex}`}
+                      className="forge-prop-tag"
+                    >
+                      {property}
+                    </span>
+                  ))}
                 </div>
               </section>
             )}
@@ -108,7 +119,9 @@ export default function WeaponResultCard({
           </p>
         ) : (
           <div className="flex flex-col gap-4">
-            <Typography.Title level={4} className="drop-item delay-3">Свойства ковки</Typography.Title>
+            <Typography.Title level={4} className="drop-item delay-3">
+              Свойства ковки
+            </Typography.Title>
             {weapon.properties.map((property) => (
               <div key={property.title}>
                 <Typography.Title level={5} className="drop-item delay-3">
