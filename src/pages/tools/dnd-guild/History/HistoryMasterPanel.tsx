@@ -1,21 +1,23 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
+  AutoComplete,
   Button,
-  Modal,
+  Card,
+  Flex,
   Form,
   Input,
   InputNumber,
-  Select,
-  Tabs,
+  Modal,
   Popconfirm,
-  Card,
-  Flex,
+  Select,
+  Space,
+  Tabs,
   Typography,
 } from "antd";
+import useApp from "antd/es/app/useApp";
 import { pb } from "../../../../API/PocketBase";
 import { COLLECTIONS } from "../../../../API/collections";
 import type { Quest } from "./HistoryMain";
-import useApp from "antd/es/app/useApp";
 import { RoleGuard } from "../../../../utils/RoleGuard";
 import { ROLES } from "../../../../types/Role";
 
@@ -24,50 +26,121 @@ interface PanelProps {
   mutate: () => void;
 }
 
-export default ({ data, mutate }: PanelProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [form] = Form.useForm();
+type QuestFormValues = {
+  week: number;
+  title: string;
+  status: Quest["status"];
+  location?: string;
+  summary: string;
+  party?: string[];
+  casualties?: string[];
+};
+
+export default function HistoryMasterPanel({ data, mutate }: PanelProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("1");
+  const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
+  const [form] = Form.useForm<QuestFormValues>();
 
   const { message } = useApp();
 
-  const handleFinish = async (values: any) => {
+  const locationOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(data.map((quest) => quest.location).filter(Boolean) as string[]),
+      )
+        .sort((a, b) => a.localeCompare(b, "ru"))
+        .map((value) => ({ value })),
+    [data],
+  );
+
+  const participantOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          data.flatMap((quest) => [
+            ...(quest.party ?? []),
+            ...(quest.casualties ?? []),
+          ]),
+        ),
+      )
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, "ru"))
+        .map((value) => ({ value })),
+    [data],
+  );
+
+  const resetToCreateMode = () => {
+    setEditingQuest(null);
+    form.resetFields();
+    form.setFieldsValue({ week: data.length + 1 });
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setActiveTab("1");
+    resetToCreateMode();
+  };
+
+  const startEdit = (quest: Quest) => {
+    setEditingQuest(quest);
+    form.setFieldsValue({
+      week: quest.week,
+      title: quest.title,
+      status: quest.status,
+      location: quest.location,
+      summary: quest.summary,
+      party: quest.party ?? [],
+      casualties: quest.casualties ?? [],
+    });
+    setActiveTab("1");
+  };
+
+  const handleFinish = async (values: QuestFormValues) => {
     setIsSubmitting(true);
     try {
-      // Если поля party/casualties остались пустыми, отправляем пустой массив
-      const newQuest = {
+      const payload = {
         ...values,
         party: values.party || [],
         casualties: values.casualties || [],
       };
 
-      await pb.collection(COLLECTIONS.guildHistory).create(newQuest);
-      message.success("Квест успешно добавлен!");
+      if (editingQuest) {
+        await pb
+          .collection(COLLECTIONS.guildHistory)
+          .update(editingQuest.id, payload);
+        message.success("Запись обновлена");
+      } else {
+        await pb.collection(COLLECTIONS.guildHistory).create(payload);
+        message.success("Квест успешно добавлен");
+      }
 
-      form.resetFields(); // Очищаем форму
-      mutate(); // Обновляем данные на клиенте
-
-      // Можно закрыть модалку: setIsOpen(false);
-    } catch (error: any) {
-      message.error("Ошибка при добавлении: " + error.message);
+      mutate();
+      resetToCreateMode();
+    } catch (error) {
+      const text = error instanceof Error ? error.message : String(error);
+      message.error("Ошибка при сохранении: " + text);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // --- УДАЛЕНИЕ ЗАПИСИ ---
   const handleDelete = async (id: string) => {
     try {
       await pb.collection(COLLECTIONS.guildHistory).delete(id);
       message.success("Запись удалена");
-      mutate(); // Обновляем данные
-    } catch (error: any) {
-      message.error("Ошибка при удалении: " + error.message);
+      if (editingQuest?.id === id) {
+        resetToCreateMode();
+      }
+      mutate();
+    } catch (error) {
+      const text = error instanceof Error ? error.message : String(error);
+      message.error("Ошибка при удалении: " + text);
     }
   };
 
-  // --- СОДЕРЖИМОЕ ВКЛАДКИ "ДОБАВИТЬ" ---
-  const AddForm = (
+  const questForm = (
     <Form
       form={form}
       layout="vertical"
@@ -97,7 +170,15 @@ export default ({ data, mutate }: PanelProps) => {
       </Form.Item>
 
       <Form.Item name="location" label="Локация">
-        <Input />
+        <AutoComplete
+          options={locationOptions}
+          filterOption={(inputValue, option) =>
+            (option?.value ?? "")
+              .toLowerCase()
+              .includes(inputValue.toLowerCase())
+          }
+          allowClear
+        />
       </Form.Item>
 
       <Form.Item
@@ -108,29 +189,45 @@ export default ({ data, mutate }: PanelProps) => {
         <Input.TextArea rows={3} />
       </Form.Item>
 
-      {/* Select с mode="tags" автоматически собирает введенный текст в массив строк */}
       <Form.Item name="party" label="Участники (введите имя и нажмите Enter)">
-        <Select mode="tags" placeholder="Например: Арагорн, Гимли" />
+        <Select
+          mode="tags"
+          options={participantOptions}
+          placeholder="Например: Арагорн, Гимли"
+        />
       </Form.Item>
 
       <Form.Item name="casualties" label="Потери (введите имя и нажмите Enter)">
-        <Select mode="tags" placeholder="Если есть..." />
+        <Select
+          mode="tags"
+          options={participantOptions}
+          placeholder="Если есть..."
+        />
       </Form.Item>
 
-      <Button type="primary" htmlType="submit" loading={isSubmitting} block>
-        Добавить запись
-      </Button>
+      <Space style={{ width: "100%", justifyContent: "space-between" }}>
+        {editingQuest ? (
+          <Button onClick={resetToCreateMode}>Отмена</Button>
+        ) : (
+          <span />
+        )}
+        <Button type="primary" htmlType="submit" loading={isSubmitting}>
+          {editingQuest ? "Сохранить изменения" : "Добавить запись"}
+        </Button>
+      </Space>
     </Form>
   );
 
-  // --- СОДЕРЖИМОЕ ВКЛАДКИ "УПРАВЛЕНИЕ" ---
-  const ManageList = (
+  const manageList = (
     <Flex vertical gap="middle">
-      {data.map((item) => (
+      {[...data].reverse().map((item) => (
         <Card
           key={item.id}
           size="small"
           actions={[
+            <Button key="edit" type="text" onClick={() => startEdit(item)}>
+              Редактировать
+            </Button>,
             <Popconfirm
               key="delete"
               title="Точно удалить?"
@@ -160,25 +257,41 @@ export default ({ data, mutate }: PanelProps) => {
   return (
     <div>
       <RoleGuard allowedRoles={[ROLES.master]}>
-        <Button type="primary" onClick={() => setIsOpen(true)}>
+        <Button
+          type="primary"
+          onClick={() => {
+            setIsOpen(true);
+            resetToCreateMode();
+          }}
+        >
           Управление историей
         </Button>
 
         <Modal
-          title="Панель администратора"
+          title={editingQuest ? "Редактирование записи" : "Панель администратора"}
           open={isOpen}
-          onCancel={() => setIsOpen(false)}
-          footer={null} // Отключаем стандартные кнопки модалки, у нас своя кнопка в форме
+          onCancel={handleClose}
+          footer={null}
+          destroyOnClose
         >
           <Tabs
-            defaultActiveKey="1"
+            activeKey={activeTab}
+            onChange={setActiveTab}
             items={[
-              { key: "1", label: "Добавить запись", children: AddForm },
-              { key: "2", label: "Управление записями", children: ManageList },
+              {
+                key: "1",
+                label: editingQuest ? "Редактировать запись" : "Добавить запись",
+                children: questForm,
+              },
+              {
+                key: "2",
+                label: "Управление записями",
+                children: manageList,
+              },
             ]}
           />
         </Modal>
       </RoleGuard>
     </div>
   );
-};
+}
