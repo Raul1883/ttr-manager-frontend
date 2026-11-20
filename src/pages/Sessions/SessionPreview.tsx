@@ -20,7 +20,6 @@ export default function SessionPreview(props: PreviewProps) {
   let data: ApplicationPayload[] = [];
   const { user } = useAuth();
 
-  
   if (props.session.expand.applications_via_session) {
     data = props.session.expand.applications_via_session;
   } else {
@@ -115,6 +114,7 @@ export default function SessionPreview(props: PreviewProps) {
         <Tag>{props.session.expand.genre.name}</Tag>
         <Tag>{props.session.expand.system.name}</Tag>
         <Tag>{props.session.expand.company.name}</Tag>
+        <Tag>{props.session.scheduled_at}</Tag>
       </Space>
     </Card>
   );
