@@ -37,6 +37,7 @@ import City from "./pages/tools/dnd-guild/City/City";
 import GuildWeapon from "./pages/tools/dnd-guild/WeaponGen/GuildWeapon";
 import HistoryMain from "./pages/tools/dnd-guild/History/HistoryMain";
 import { Necropolis } from "./pages/tools/dnd-guild/Necropolis/Necropolis";
+import AchievementsPage from "./pages/tools/dnd-guild/achievements/AchievementsPage";
 
 const CharacterSchemasEditor = React.lazy(
   () => import("./pages/master/SystemSchemaEditor/ListSchemasEditor"),
@@ -75,6 +76,10 @@ function App() {
 
                   <Route path="guild">
                     <Route index element={<GuildMainPage />} />
+                    <Route
+                      path="achievements"
+                      element={<AchievementsPage />}
+                    />
                     <Route path="city" element={<City />} />
                     <Route path="weapon" element={<GuildWeapon />} />
                     <Route path="history" element={<HistoryMain />} />

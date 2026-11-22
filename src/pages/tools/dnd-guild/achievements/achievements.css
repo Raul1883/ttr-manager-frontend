@@ -1,0 +1,21 @@
+/* Фон «бумаги с сеткой» и аккуратный скролл — только для графа достижений. */
+.achievements-graph {
+  background-color: #f4ecdb;
+  background-image: radial-gradient(#d9cdb4 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.achievements-graph::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.achievements-graph::-webkit-scrollbar-thumb {
+  border: 2px solid #f4ecdb;
+  border-radius: 6px;
+  background: #c9bda2;
+}
+
+.achievements-graph::-webkit-scrollbar-track {
+  background: #f4ecdb;
+}

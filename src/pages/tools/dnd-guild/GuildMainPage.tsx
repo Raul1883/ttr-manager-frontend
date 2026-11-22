@@ -22,9 +22,14 @@ const items: menuItem[] = [
     path: "necropolis",
     description: "Истории павших",
   },
+  {
+    title: "Достижения",
+    path: "achievements",
+    description: "Визуальный прототип графа внутриигровых достижений",
+  },
 ];
 
-export default () => {
+export default function GuildMainPage() {
   return (
     <MainLayout>
       <Menu menuItems={items} title="Гильдийские ваншоты" />

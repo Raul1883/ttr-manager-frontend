@@ -13,7 +13,7 @@ const items: menuItem[] = [
     description: "Хоумрулы и лор для различных компаний и сеттингов",
   },
 ];
-export default () => {
+export default function ToolsMainPage() {
   return (
     <MainLayout>
       <Menu menuItems={items} title="Инструменты" />
